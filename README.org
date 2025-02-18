@@ -1,0 +1,5 @@
+#+title: Bricked-Up: Backend
+
+* Requirements and Organization
+Please refer to [[https://github.com/bricked-up/requirements][requirements]] (for specifics see the *backend* directory).
+
