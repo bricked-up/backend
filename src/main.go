@@ -1,6 +1,5 @@
 // Package main provides the backend infrastructure (route handling + database) 
 // for the Bricked-Up website.
-
 package main
 
 import (
