@@ -12,7 +12,6 @@ import (
 const PORT = ":3100" // Server port number.
 
 // Endpoints maps URL paths to their corresponding handler functions.
-
 var endpoints = map[string]http.HandlerFunc{
     "/login":  loginHandler,
     "/signup": signupHandler,
@@ -21,7 +20,6 @@ var endpoints = map[string]http.HandlerFunc{
 
 // LoginHandler handles requests to the /login endpoint.
 // It only allows GET requests and responds with a placeholder message.
-
 func loginHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method != "GET" {
         http.Error(w, "Method unsupported", http.StatusMethodNotAllowed)
@@ -32,7 +30,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 // SignupHandler handles requests to the /signup endpoint.
 // It restricts the request method to GET and responds with a placeholder message.
-
 func signupHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method != "GET" {
         http.Error(w, "Method unsupported", http.StatusMethodNotAllowed)
@@ -43,7 +40,6 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 
 // VerifyHandler handles requests to the /verify endpoint.
 // Only GET requests are supported, and it returns a placeholder response.
-
 func verifyHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method != "GET" {
         http.Error(w, "Method unsupported", http.StatusMethodNotAllowed)
@@ -54,7 +50,6 @@ func verifyHandler(w http.ResponseWriter, r *http.Request) {
 
 // MainHandler checks if the request URL matches a known endpoint.
 // If it does, the corresponding handler is called; otherwise, it returns a 404 error.
-
 func mainHandler(w http.ResponseWriter, r *http.Request) {
     if handler, ok := endpoints[r.URL.Path]; ok {
         handler(w, r)
@@ -65,7 +60,6 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 // Main sets up the server and starts listening on the defined PORT.
 // It registers MainHandler to process all incoming HTTP requests.
-
 func main() {
     http.HandleFunc("/", mainHandler)
 
