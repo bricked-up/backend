@@ -1,0 +1,1 @@
+This directory contains sql scripts for initializing / setting-up production, developer and testing databases.
