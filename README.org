@@ -1,8 +1,11 @@
 #+title: Bricked-Up: Backend
 
+#+begin_html
 <img alt="GitHub License" src="https://img.shields.io/github/license/bricked-up/backend?style=for-the-badge">
 
 <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/bricked-up/backend/go.yml?style=for-the-badge">
+#+end_html
+
 
 * Requirements and Organization
 Please refer to [[https://github.com/bricked-up/requirements][requirements]] (for specifics see the *backend* directory).
