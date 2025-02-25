@@ -18,20 +18,20 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
   | Status Code | Event                                                         |
   |-------------+---------------------------------------------------------------|
   |         200 | Ok                                                            |
-  |         400 | Invalid request                                               |
+  |-------------+---------------------------------------------------------------|
+  |         400 | Invalid request                                                 |
+  |-------------+---------------------------------------------------------------|
   |         401 | Unauthorized (client lacks permission to access the endpoint) |
-  |         405 | Method not allowed (e.g. using GET instead of POST)           |
-  |         500 | Error in the server (e.g. server crashes)                     |
+  |-------------+---------------------------------------------------------------|
+  |         500 | Error in the server                                           |
+  |-------------+---------------------------------------------------------------|
 
  *NOTE*: "Request" and "Response" below refer to the perspective of the server.
 
- | Endpoint    | HTTP Method |
- |-------------+-------------|
- | [[https://github.com/bricked-up/backend/issues/7][/signup]]     | POST        |
- | [[https://github.com/bricked-up/backend/issues/8][/verify]]     | POST        |
- | [[https://github.com/bricked-up/backend/issues/6][/login]]      | POST        |
- | [[https://github.com/bricked-up/backend/issues/10][/userdelete]] | DELETE      |
- | [[https://github.com/bricked-up/backend/issues/11][/useredit]]   | PATCH       |
- | [[https://github.com/bricked-up/backend/issues/9][/createorg]]  | POST        |
- | [[https://github.com/bricked-up/backend/issues/13][/deleteorg]]  | DELETE      |
- 
+- [[https://github.com/bricked-up/backend/issues/7][/signup]]
+- [[https://github.com/bricked-up/backend/issues/8][/verify]]
+- [[https://github.com/bricked-up/backend/issues/6][/login]]
+- [[https://github.com/bricked-up/backend/issues/10][/userdelete]]
+- [[https://github.com/bricked-up/backend/issues/11][/useredit]]
+- [[https://github.com/bricked-up/backend/issues/9][/createorg]]
+- [[https://github.com/bricked-up/backend/issues/13][/deleteorg]]
