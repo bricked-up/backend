@@ -10,3 +10,35 @@
 * Requirements and Organization
 Please refer to [[https://github.com/bricked-up/requirements][requirements]] (for specifics see the *backend* directory).
 
+* Endpoints
+ All communication between the [[https://github.com/bricked-up/frontend][frontend]] and backend will take place over HTTP. The body of the request and the response will be a ~string~. If a more complex struct of information is required, JSON will be used. In the case of *failure* the response body will contain an error message (~string~) on the relevant error.
+
+ Here are the HTTP response codes we will use:
+
+ #+begin_html
+  | Status Code | Event                                                         |
+  |-------------+---------------------------------------------------------------|
+  |         200 | Ok                                                            |
+  |-------------+---------------------------------------------------------------|
+  |         400 | Invalid request (/see table below/)                             |
+  |-------------+---------------------------------------------------------------|
+  |         401 | Unauthorized (client lacks permission to access the endpoint) |
+  |-------------+---------------------------------------------------------------|
+  |         500 | Error in the server                                           |
+  |-------------+---------------------------------------------------------------|
+ #+end_html
+
+ *NOTE*: The "Request" and "Response" columns below are from the perspective of the server.
+
+ #+begin_html
+ | Endpoint | Request                     | Response           |
+ |----------+-----------------------------+--------------------|
+ | /signup  | - email ~string~              | X                  |
+ |          | - encrypted password ~string~ |                    |
+ |----------+-----------------------------+--------------------|
+ | /verify  | - verification code ~string~  | - sessionid ~string~ |
+ |----------+-----------------------------+--------------------|
+ | /login   | - email ~string~              | - sessionid ~string~ |
+ |          | - encrypted password ~string~ |                    |
+ |----------+-----------------------------+--------------------|
+#+end_html
