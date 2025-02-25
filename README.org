@@ -30,7 +30,6 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
 
  *NOTE*: The "Request" and "Response" columns below are from the perspective of the server.
 
- #+begin_export html
  | Endpoint | Request                     | Response           |
  |----------+-----------------------------+--------------------|
  | /signup  | - email ~string~              | X                  |
@@ -41,4 +40,3 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
  | /login   | - email ~string~              | - sessionid ~string~ |
  |          | - encrypted password ~string~ |                    |
  |----------+-----------------------------+--------------------|
-#+end_export
