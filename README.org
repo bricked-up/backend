@@ -1,5 +1,6 @@
 #+title: Bricked-Up: Backend
 
+
 #+begin_html
 <img alt="GitHub License" src="https://img.shields.io/github/license/bricked-up/backend?style=for-the-badge">
 
@@ -34,4 +35,3 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
  | [[https://github.com/bricked-up/backend/issues/11][/user]]      | PATCH       | Edit user data.                          |
  | [[https://github.com/bricked-up/backend/issues/9][/org]]       | POST        | Create an organization.                  |
  | [[https://github.com/bricked-up/backend/issues/13][/org]]       | DELETE      | Delete an organization.                  |
- 
