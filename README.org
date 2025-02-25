@@ -31,9 +31,11 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
  *NOTE*: For conciseness, if "Response" is missing below, assume the response to have an empty body. All responses listed below assume everything was successful (HTTP 200).
 
 *** /signup
-**** Request
+:drawer_beg:
+Request
 - email ~string~
 - encrypted password ~string~
+:end:
 
 *** /verify
 **** Request
