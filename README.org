@@ -19,7 +19,7 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
   |-------------+---------------------------------------------------------------|
   |         200 | Ok                                                            |
   |-------------+---------------------------------------------------------------|
-  |         400 | Invalid request (/see below/)                                   |
+  |         400 | Invalid request                                                 |
   |-------------+---------------------------------------------------------------|
   |         401 | Unauthorized (client lacks permission to access the endpoint) |
   |-------------+---------------------------------------------------------------|
@@ -28,26 +28,10 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
 
  *NOTE*: "Request" and "Response" below refer to the perspective of the server.
 
- *NOTE*: For conciseness, if "Response" is missing below, assume the response to have an empty body. All responses listed below assume everything was successful (HTTP 200).
-
-*** /signup
-:drawer_beg:
-Request
-- email ~string~
-- encrypted password ~string~
-:end:
-
-*** /verify
-**** Request
-- verification code ~string~
-  
-**** Response
-- sessionid ~string~
-
-*** /login
-**** Request
-- email ~string~
-- encrypted password ~string~
-  
-**** Response
-- sessionid ~string~
+- [[https://github.com/bricked-up/backend/issues/7][/signup]]
+- [[https://github.com/bricked-up/backend/issues/8][/verify]]
+- [[https://github.com/bricked-up/backend/issues/6][/login]]
+- [[https://github.com/bricked-up/backend/issues/10][/userdelete]]
+- [[https://github.com/bricked-up/backend/issues/11][/useredit]]
+- [[https://github.com/bricked-up/backend/issues/9][/createorg]]
+- [[https://github.com/bricked-up/backend/issues/13][/deleteorg]]
