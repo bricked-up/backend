@@ -23,15 +23,15 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
   |         405 | Method not allowed (e.g. using GET instead of POST)           |
   |         500 | Error in the server (e.g. server crashes)                     |
 
- *NOTE*: "Request" and "Response" below refer to the perspective of the server.
+ *NOTE*: "Request" and "Response" are from the perspective of the server.
 
- | Endpoint    | HTTP Method |
- |-------------+-------------|
- | [[https://github.com/bricked-up/backend/issues/7][/signup]]     | POST        |
- | [[https://github.com/bricked-up/backend/issues/8][/verify]]     | POST        |
- | [[https://github.com/bricked-up/backend/issues/6][/login]]      | POST        |
- | [[https://github.com/bricked-up/backend/issues/10][/userdelete]] | DELETE      |
- | [[https://github.com/bricked-up/backend/issues/11][/useredit]]   | PATCH       |
- | [[https://github.com/bricked-up/backend/issues/9][/createorg]]  | POST        |
- | [[https://github.com/bricked-up/backend/issues/13][/deleteorg]]  | DELETE      |
+ | Endpoint   | HTTP Method | Description                              |
+ |------------+-------------+------------------------------------------|
+ | [[https://github.com/bricked-up/backend/issues/7][/signup]]    | POST        | Create user account.                     |
+ | [[https://github.com/bricked-up/backend/issues/8][/verify]]    | POST        | Verify user account.                     |
+ | [[https://github.com/bricked-up/backend/issues/6][/login]]     | POST        | Check if user's credentials are correct. |
+ | [[https://github.com/bricked-up/backend/issues/10][/user]]      | DELETE      | Delete user account.                     |
+ | [[https://github.com/bricked-up/backend/issues/11][/user]]      | PATCH       | Edit user data.                          |
+ | [[https://github.com/bricked-up/backend/issues/9][/org]]       | POST        | Create an organization.                  |
+ | [[https://github.com/bricked-up/backend/issues/13][/org]]       | DELETE      | Delete an organization.                  |
  
