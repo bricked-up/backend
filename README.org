@@ -15,28 +15,37 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
 
  Here are the HTTP response codes we will use:
 
- #+begin_html
   | Status Code | Event                                                         |
   |-------------+---------------------------------------------------------------|
   |         200 | Ok                                                            |
   |-------------+---------------------------------------------------------------|
-  |         400 | Invalid request (/see table below/)                             |
+  |         400 | Invalid request (/see below/)                                   |
   |-------------+---------------------------------------------------------------|
   |         401 | Unauthorized (client lacks permission to access the endpoint) |
   |-------------+---------------------------------------------------------------|
   |         500 | Error in the server                                           |
   |-------------+---------------------------------------------------------------|
- #+end_html
 
- *NOTE*: The "Request" and "Response" columns below are from the perspective of the server.
+ *NOTE*: "Request" and "Response" below refer to the perspective of the server.
 
- | Endpoint | Request                     | Response           |
- |----------+-----------------------------+--------------------|
- | /signup  | - email ~string~              | X                  |
- |          | - encrypted password ~string~ |                    |
- |----------+-----------------------------+--------------------|
- | /verify  | - verification code ~string~  | - sessionid ~string~ |
- |----------+-----------------------------+--------------------|
- | /login   | - email ~string~              | - sessionid ~string~ |
- |          | - encrypted password ~string~ |                    |
- |----------+-----------------------------+--------------------|
+ *NOTE*: For conciseness, if "Response" is missing below, assume the response to have an empty body. All responses listed below assume everything was successful (HTTP 200).
+
+*** /signup
+**** Request
+- email ~string~
+- encrypted password ~string~
+
+*** /verify
+**** Request
+- verification code ~string~
+  
+**** Response
+- sessionid ~string~
+
+*** /login
+**** Request
+- email ~string~
+- encrypted password ~string~
+  
+**** Response
+- sessionid ~string~
