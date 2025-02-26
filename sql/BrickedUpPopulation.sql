@@ -1,4 +1,3 @@
--- database: :memory:
 --SQLite Database Population Script for BrickedUp Project Management System
 
 -- Insert Organizations

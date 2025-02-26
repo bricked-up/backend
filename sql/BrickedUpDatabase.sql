@@ -1,5 +1,6 @@
--- database: :memory:
--- for the database, memory is local on my computer, needs to be changed on project deployment
+--SQL Queries for creating the BrickedUp database.
+
+-- Enable foreign key constraints in SQLite.
 PRAGMA foreign_keys = ON;
 
 -- Organization table
