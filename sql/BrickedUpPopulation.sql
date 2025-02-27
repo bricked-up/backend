@@ -1,4 +1,4 @@
---SQLite Database Population Script for BrickedUp Project Management System
+-- SQLite Database Population Script for BrickedUp Project Management System
 
 -- Insert Organizations
 INSERT INTO organization (name) VALUES 
@@ -7,12 +7,12 @@ INSERT INTO organization (name) VALUES
 ('NextGen Solutions');
 
 -- Insert Users
-INSERT INTO user (name) VALUES 
-('Alice Johnson', 'password123'),
-('Bob Smith', 'password456'),
-('Charlie Brown', 'password789'),
-('Diana Prince', 'wonderwoman'),
-('Ethan Hunt', 'missionimpossible');
+INSERT INTO user (verifyid, email, password, name) VALUES 
+(1, 'alice.johnson@techcorp.com', 'password123', 'Alice Johnson'),
+(2, 'bob.smith@techcorp.com', 'password456', 'Bob Smith'),
+(3, 'charlie.brown@greeninnovations.com', 'password789', 'Charlie Brown'),
+(4, 'diana.prince@nextgensolutions.com', 'wonderwoman', 'Diana Prince'),
+(5, 'ethan.hunt@nextgensolutions.com', 'missionimpossible', 'Ethan Hunt');
 
 -- Insert Organization Roles
 INSERT INTO organization_role (organization_id, name, can_read, can_write, can_execute) VALUES
@@ -47,9 +47,9 @@ INSERT INTO project_member (user_id, project_id) VALUES
 
 -- Insert Tags
 INSERT INTO tag (project_id, name, color) VALUES
-(1, 'AI', 'blue'),
-(2, 'Sustainability', 'green'),
-(3, 'Security', 'red');
+(1, 'AI', '#0000FF'),  -- blue
+(2, 'Sustainability', '#008000'),  -- green
+(3, 'Security', '#FF0000');  -- red
 
 -- Insert Priorities
 INSERT INTO priority (project_id, name, priority_level) VALUES

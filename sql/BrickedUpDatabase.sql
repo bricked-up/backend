@@ -1,5 +1,3 @@
---SQL Queries for creating the BrickedUp database.
-
 -- Enable foreign key constraints in SQLite.
 PRAGMA foreign_keys = ON;
 
@@ -23,8 +21,19 @@ CREATE TABLE organization_role (
 -- User table
 CREATE TABLE user (
     id INTEGER PRIMARY KEY,
-    username TEXT NOT NULL UNIQUE
-    password TEXT NOT NULL
+    verifyid INTEGER,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    name TEXT,
+    FOREIGN KEY (verifyid) REFERENCES verify_user(id)
+);
+
+-- Session table
+CREATE TABLE session (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    expires DATE,
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 -- Organization members table
@@ -86,7 +95,7 @@ CREATE TABLE tag (
     id INTEGER PRIMARY KEY,
     project_id INTEGER,
     name TEXT NOT NULL,
-    color TEXT NOT NULL,
+    color INTEGER, -- Color stored as integer (Hex format)
     FOREIGN KEY (project_id) REFERENCES project(id)
 );
 
@@ -99,33 +108,6 @@ CREATE TABLE priority (
     FOREIGN KEY (project_id) REFERENCES project(id)
 );
 
--- Organization projects table (many-to-many)
-CREATE TABLE organization_project (
-    id INTEGER PRIMARY KEY,
-    organization_id INTEGER,
-    project_id INTEGER,
-    FOREIGN KEY (organization_id) REFERENCES organization(id),
-    FOREIGN KEY (project_id) REFERENCES project(id)
-);
-
--- Project issues table (many-to-many)
-CREATE TABLE project_issue (
-    id INTEGER PRIMARY KEY,
-    project_id INTEGER,
-    issue_id INTEGER,
-    FOREIGN KEY (project_id) REFERENCES project(id),
-    FOREIGN KEY (issue_id) REFERENCES issue(id)
-);
-
--- User issues table (many-to-many)
-CREATE TABLE user_issue (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER,
-    issue_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (issue_id) REFERENCES issue(id)
-);
-
 -- Reminders table
 CREATE TABLE reminder (
     id INTEGER PRIMARY KEY,
@@ -135,4 +117,36 @@ CREATE TABLE reminder (
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
+-- Verify User table
+CREATE TABLE verify_user (
+    id INTEGER PRIMARY KEY,
+    code INTEGER UNIQUE,
+    expires DATE
+);
 
+-- Organization Projects (Many-to-Many relationship)
+CREATE TABLE organization_project (
+    id INTEGER PRIMARY KEY,
+    organization_id INTEGER,
+    project_id INTEGER,
+    FOREIGN KEY (organization_id) REFERENCES organization(id),
+    FOREIGN KEY (project_id) REFERENCES project(id)
+);
+
+-- Project Issues (Many-to-Many relationship)
+CREATE TABLE project_issue (
+    id INTEGER PRIMARY KEY,
+    project_id INTEGER,
+    issue_id INTEGER,
+    FOREIGN KEY (project_id) REFERENCES project(id),
+    FOREIGN KEY (issue_id) REFERENCES issue(id)
+);
+
+-- User Issues (Many-to-Many relationship)
+CREATE TABLE user_issue (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    issue_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (issue_id) REFERENCES issue(id)
+);
