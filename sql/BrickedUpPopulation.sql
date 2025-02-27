@@ -8,11 +8,11 @@ INSERT INTO organization (name) VALUES
 
 -- Insert Users
 INSERT INTO user (name) VALUES 
-('Alice Johnson'),
-('Bob Smith'),
-('Charlie Brown'),
-('Diana Prince'),
-('Ethan Hunt');
+('Alice Johnson', 'password123'),
+('Bob Smith', 'password456'),
+('Charlie Brown', 'password789'),
+('Diana Prince', 'wonderwoman'),
+('Ethan Hunt', 'missionimpossible');
 
 -- Insert Organization Roles
 INSERT INTO organization_role (organization_id, name, can_read, can_write, can_execute) VALUES

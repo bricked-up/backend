@@ -23,7 +23,8 @@ CREATE TABLE organization_role (
 -- User table
 CREATE TABLE user (
     id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL
+    username TEXT NOT NULL UNIQUE
+    password TEXT NOT NULL
 );
 
 -- Organization members table
