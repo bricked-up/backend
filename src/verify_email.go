@@ -10,7 +10,7 @@ import (
 // verifyUser verifies the user's email using the provided verification code.
 // It removes all expired verification codes from the database and sets the user's
 // verifyid to NULL if the verification code is correct and has not expired.
-func verifyUser(verificationCode string) error {
+func VerifyUser(verificationCode string) error {
 	// Remove expired verification codes
 	db, err := sql.Open("sqlite", "bricked-up_prod.db")
 	if err != nil {
@@ -37,6 +37,6 @@ func verifyUser(verificationCode string) error {
 	if err != nil {
 		return err
 	}
-
+	db.Close()
 	return nil
 }
