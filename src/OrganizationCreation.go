@@ -8,12 +8,12 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const dbPath = "Database/backend/sql/BrickedUpDatabase.sql"
+const dbPath = "backend/sql/BrickedUpDatabase.sql"
 
 // CreateOrganization creates a new organization and assigns the user to it.
 // It takes sessionID, orgName, and userID as parameters instead of extracting them from the request.
 func CreateOrganization(sessionID, orgName string, userID int) (int, error) {
-	// Validate the inputs
+	// Check if sessionID and orgName are provided
 	if sessionID == "" || orgName == "" {
 		return 0, fmt.Errorf("missing sessionID or orgName")
 	}
@@ -29,7 +29,7 @@ func CreateOrganization(sessionID, orgName string, userID int) (int, error) {
 	// Enable foreign keys
 	_, _ = db.Exec("PRAGMA foreign_keys = ON;")
 
-	// Validate session ID and check if the user ID exists (Assuming a 'sessions' table exists)
+	// Validate session ID and check if the user ID exists
 	var storedUserID int
 	err = db.QueryRow("SELECT user_id FROM sessions WHERE session_id = ?", sessionID).Scan(&storedUserID)
 	if err != nil {
@@ -43,19 +43,21 @@ func CreateOrganization(sessionID, orgName string, userID int) (int, error) {
 
 	// Insert new organization and get its ID
 	var orgID int
-	err = db.QueryRow("INSERT INTO organization(name) VALUES(?) RETURNING id", orgName).Scan(&orgID)
+	err = db.QueryRow("INSERT INTO organizations(name) VALUES(?) RETURNING id", orgName).Scan(&orgID)
 	if err != nil {
 		return 0, fmt.Errorf("organization name already exists or failed to insert: %v", err)
 	}
 
 	// Create admin role for the organization
-	_, err = db.Exec("INSERT INTO organization_role (organization_id, name, can_read, can_write, can_execute) VALUES (?, 'admin', 1, 1, 1)", orgID)
+	_, err = db.Exec(`
+		INSERT INTO organization_roles (organization_id, role_name, can_read, can_write, can_execute)
+		VALUES (?, 'admin', 1, 1, 1)`, orgID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create admin role: %v", err)
 	}
 
-	// Assign user to organization
-	_, err = db.Exec("INSERT INTO organization_member (user_id, organization_id) VALUES (?, ?)", userID, orgID)
+	// Assign user to the organization as the admin
+	_, err = db.Exec("INSERT INTO organization_members (user_id, organization_id, role_id) VALUES (?, ?, ?)", userID, orgID, 1)
 	if err != nil {
 		return 0, fmt.Errorf("failed to add user to organization: %v", err)
 	}
