@@ -1,6 +1,5 @@
 // Package backend provides the backend infrastructure (route handling + database)
 // for the Bricked-Up website.
-// package backend;
 package backend
 
 import (
@@ -12,7 +11,7 @@ import (
 var endpoints = map[string]http.HandlerFunc{
 	"/login":  loginHandler,
 	"/signup": signupHandler,
-	"/verify": VerifyEmailHandler, // This handler supports POST requests
+	"/verify": verifyHandler,
 }
 
 // LoginHandler handles requests to the /login endpoint.
@@ -35,14 +34,14 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "TODO: Signup")
 }
 
-// VerifyEmailHandler handles requests to the /verify endpoint.
-// It verifies the email using the provided token.
-func VerifyEmailHandler(w http.ResponseWriter, r *http.Request) {
+// VerifyHandler handles requests to the /verify endpoint.
+// Only GET requests are supported, and it returns a placeholder response.
+func verifyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method unsupported", http.StatusMethodNotAllowed)
 		return
 	}
-	fmt.Fprintf(w, "TODO:Verify Email")
+	fmt.Fprintf(w, "TODO: Verify")
 }
 
 // MainHandler checks if the request URL matches a known endpoint.
