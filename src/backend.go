@@ -1,6 +1,5 @@
 // Package backend provides the backend infrastructure (route handling + database)
 // for the Bricked-Up website.
-// package backend;
 package backend
 
 import (
