@@ -39,12 +39,12 @@ func init() {
 }
 
 // loginHandler handles HTTP POST requests to the /login endpoint for user authentication.
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	// Only allow POST requests; reject other HTTP methods.
+func login(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
+		return fmt.Errorf("invalid request method: %s", r.Method)
 	}
+	return nil
+}
 
 	// Decode the JSON request body into a Credentials struct.
 	var creds Credentials
