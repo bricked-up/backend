@@ -1,4 +1,4 @@
-package main
+package backend 
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3" // SQLite driver for database/sql
+	_ "modernc.org/sqlite" // SQLite driver for database/sql
 	"golang.org/x/crypto/bcrypt"   // Library for secure password hashing
 )
 
@@ -108,16 +108,4 @@ func generateToken() (string, error) {
 	// Placeholder for secure token generation.
 	// In a real application, use a cryptographically secure random generator.
 	return "secure-random-token", nil
-}
-
-// main is the entry point of the program. It starts the HTTP server.
-func main() {
-	// Register the loginHandler function to handle requests to the /login endpoint.
-	http.HandleFunc("/login", loginHandler)
-
-	// Log a message indicating that the server is starting.
-	log.Println("Server started on port 3100")
-
-	// Start the HTTP server on port 3100 and log any errors.
-	log.Fatal(http.ListenAndServe(":3100", nil))
 }
