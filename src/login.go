@@ -1,14 +1,15 @@
-package backend 
+package backend
 
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
-	_ "modernc.org/sqlite" // SQLite driver for database/sql
-	"golang.org/x/crypto/bcrypt"   // Library for secure password hashing
+	"golang.org/x/crypto/bcrypt" // Library for secure password hashing
+	_ "modernc.org/sqlite"       // SQLite driver for database/sql
 )
 
 // Credentials represents the user's login credentials (email and password).
@@ -38,19 +39,17 @@ func init() {
 	}
 }
 
-// loginHandler handles HTTP POST requests to the /login endpoint for user authentication.
+// login handles HTTP POST requests to the /login endpoint for user authentication.
 func login(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
 		return fmt.Errorf("invalid request method: %s", r.Method)
 	}
-	return nil
-}
 
 	// Decode the JSON request body into a Credentials struct.
 	var creds Credentials
 	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
+		return nil
 	}
 
 	// Query the database to retrieve the user's ID and hashed password.
@@ -61,14 +60,14 @@ func login(w http.ResponseWriter, r *http.Request) error {
 		// If the query fails (e.g., user not found), log the error and return an unauthorized response.
 		log.Println("Database error:", err)
 		http.Error(w, "Login failed", http.StatusUnauthorized)
-		return
+		return nil
 	}
 
 	// Compare the provided password with the stored hashed password.
 	if err := bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(creds.Password)); err != nil {
 		// If the passwords don't match, return an unauthorized response.
 		http.Error(w, "Login failed", http.StatusUnauthorized)
-		return
+		return nil
 	}
 
 	// Generate a secure session token for the user.
@@ -77,7 +76,7 @@ func login(w http.ResponseWriter, r *http.Request) error {
 		// If token generation fails, log the error and return an internal server error.
 		log.Println("Token generation error:", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return nil
 	}
 
 	// Set the session expiration time to 24 hours from now.
@@ -88,7 +87,7 @@ func login(w http.ResponseWriter, r *http.Request) error {
 		// If session creation fails, log the error and return an internal server error.
 		log.Println("Session creation error:", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return nil
 	}
 
 	// Create a Session struct to return to the client.
@@ -101,6 +100,8 @@ func login(w http.ResponseWriter, r *http.Request) error {
 	// Set the response content type to JSON and encode the session as JSON.
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(session)
+
+	return nil
 }
 
 // generateToken generates a secure, unique token for user sessions.
