@@ -1,4 +1,4 @@
-package utils
+package backend
 
 import (
     "database/sql"
@@ -34,7 +34,7 @@ func TestUpdateUserName(t *testing.T) {
     }
 
     // Call the function to update the user's name to "Ivan".
-    err = ChangeDisplayName(dbase, 1, "Ivan")
+    err = ChangeDisplayName(1, "Ivan")
     if err != nil {
         t.Errorf("UpdateUserName returned error: %v", err)
     }
