@@ -1,183 +1,179 @@
--- Creating tables for primitive entities
+-- database: :memory:
 
 PRAGMA foreign_keys = ON;
 
--- Table to store organizations
 CREATE TABLE ORGANIZATION (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each organization
-    name TEXT UNIQUE NOT NULL   -- Name of the organization (unique)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
 );
 
--- Table to store roles for organizations
 CREATE TABLE ORG_ROLE (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each role
-    orgid INTEGER NOT NULL,    -- Foreign key referencing the organization
-    name TEXT NOT NULL,        -- Role name
-    can_read BOOLEAN NOT NULL, -- Permission to read
-    can_write BOOLEAN NOT NULL, -- Permission to write
-    can_exec BOOLEAN NOT NULL, -- Permission to execute
-    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) -- Enforcing foreign key constraint
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    orgid INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    can_read BOOLEAN NOT NULL,
+    can_write BOOLEAN NOT NULL,
+    can_exec BOOLEAN NOT NULL,
+    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) ON DELETE CASCADE
 );
 
--- Table to store users
-CREATE TABLE USER (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each user
-    verifyid INTEGER,          -- Foreign key referencing the VERIFY_USER table (verification)
-    email TEXT UNIQUE NOT NULL, -- User's email (unique)
-    password TEXT NOT NULL,    -- User's password
-    name TEXT NOT NULL,        -- User's name
-    avatar TEXT UNIQUE NOT NULL, -- User's avatar (unique)
-    FOREIGN KEY (verifyid) REFERENCES VERIFY_USER(id) -- Enforcing foreign key constraint
-);
-
--- Table to store session details for users
-CREATE TABLE SESSION (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each session
-    userid INTEGER NOT NULL,   -- Foreign key referencing the USER table
-    expires DATE NOT NULL,     -- Expiry date of the session
-    FOREIGN KEY (userid) REFERENCES USER(id) -- Enforcing foreign key constraint
-);
-
--- Table to store projects
-CREATE TABLE PROJECT (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each project
-    orgid INTEGER NOT NULL,    -- Foreign key referencing the ORGANIZATION table
-    name TEXT NOT NULL,        -- Project name
-    budget INTEGER NOT NULL,   -- Project budget
-    charter TEXT NOT NULL,     -- Project charter or description
-    archived BOOLEAN NOT NULL, -- Flag to indicate if the project is archived
-    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) -- Enforcing foreign key constraint
-);
-
--- Table to store roles for projects
-CREATE TABLE PROJECT_ROLE (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each project role
-    projectid INTEGER NOT NULL, -- Foreign key referencing the PROJECT table
-    name TEXT NOT NULL,         -- Role name
-    can_read BOOLEAN NOT NULL,  -- Permission to read
-    can_write BOOLEAN NOT NULL, -- Permission to write
-    can_exec BOOLEAN NOT NULL,  -- Permission to execute
-    FOREIGN KEY (projectid) REFERENCES PROJECT(id) -- Enforcing foreign key constraint
-);
-
--- Table to store issues for projects
-CREATE TABLE ISSUE (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each issue
-    title TEXT NOT NULL,       -- Title of the issue
-    desc TEXT NOT NULL,        -- Description of the issue
-    tagid INTEGER NOT NULL,    -- Foreign key referencing the TAG table
-    priorityid INTEGER NOT NULL, -- Foreign key referencing the PRIORITY table
-    created DATE NOT NULL,     -- Date when the issue was created
-    completed DATE,            -- Date when the issue was completed
-    cost INTEGER NOT NULL,     -- Cost associated with the issue
-    FOREIGN KEY (tagid) REFERENCES TAG(id),          -- Enforcing foreign key constraint
-    FOREIGN KEY (priorityid) REFERENCES PRIORITY(id) -- Enforcing foreign key constraint
-);
-
--- Table to store tags for issues in projects
-CREATE TABLE TAG (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each tag
-    projectid INTEGER NOT NULL, -- Foreign key referencing the PROJECT table
-    name TEXT NOT NULL,         -- Tag name
-    color INTEGER NOT NULL,     -- Color for the tag stored as a hex value
-    FOREIGN KEY (projectid) REFERENCES PROJECT(id) -- Enforcing foreign key constraint
-);
-
--- Table to store priorities for issues in projects
-CREATE TABLE PRIORITY (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each priority
-    projectid INTEGER NOT NULL, -- Foreign key referencing the PROJECT table
-    name TEXT NOT NULL,         -- Name of the priority (e.g., High, Low)
-    priority INTEGER NOT NULL,  -- Priority value (1, 2, 3, etc.)
-    FOREIGN KEY (projectid) REFERENCES PROJECT(id) -- Enforcing foreign key constraint
-);
-
--- Table to store reminders for issues
-CREATE TABLE REMINDER (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each reminder
-    issueid INTEGER NOT NULL,  -- Foreign key referencing the ISSUE table
-    userid INTEGER NOT NULL,   -- Foreign key referencing the USER table
-    FOREIGN KEY (issueid) REFERENCES ISSUE(id), -- Enforcing foreign key constraint
-    FOREIGN KEY (userid) REFERENCES USER(id)    -- Enforcing foreign key constraint
-);
-
--- Relationship tables
-
--- Table to store verification codes for users
 CREATE TABLE VERIFY_USER (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each verification record
-    code INTEGER UNIQUE NOT NULL, -- Unique code for verification
-    expires DATE NOT NULL      -- Expiry date for the verification code
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code INTEGER UNIQUE NOT NULL,
+    expires DATE NOT NULL
 );
 
--- Table to store members of organizations
+CREATE TABLE USER (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    verifyid INTEGER,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    name TEXT NOT NULL,
+    avatar TEXT,
+    FOREIGN KEY (verifyid) REFERENCES VERIFY_USER(id) ON DELETE SET NULL
+);
+
+CREATE TABLE SESSION (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userid INTEGER NOT NULL,
+    expires DATE NOT NULL,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE
+);
+
+CREATE TABLE PROJECT (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    orgid INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    budget INTEGER NOT NULL,
+    charter TEXT NOT NULL,
+    archived BOOLEAN NOT NULL,
+    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) ON DELETE CASCADE
+);
+
+CREATE TABLE PROJECT_ROLE (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    projectid INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    can_read BOOLEAN NOT NULL,
+    can_write BOOLEAN NOT NULL,
+    can_exec BOOLEAN NOT NULL,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
+);
+
+CREATE TABLE TAG (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    projectid INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    color TEXT NOT NULL,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
+);
+
+CREATE TABLE PRIORITY (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    projectid INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    priority INTEGER NOT NULL,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
+);
+
+CREATE TABLE ISSUE (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    desc TEXT NOT NULL,
+    tagid INTEGER,
+    priorityid INTEGER,
+    created DATE NOT NULL,
+    completed DATE,
+    cost INTEGER NOT NULL,
+    FOREIGN KEY (tagid) REFERENCES TAG(id) ON DELETE SET NULL,
+    FOREIGN KEY (priorityid) REFERENCES PRIORITY(id) ON DELETE SET NULL
+);
+
+CREATE TABLE REMINDER (
+    id INTEGER PRIMARY KEY,
+    issueid INTEGER NOT NULL,
+    userid INTEGER NOT NULL,
+    FOREIGN KEY (issueid) REFERENCES ISSUE(id) ON DELETE CASCADE,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE
+);
+
 CREATE TABLE ORG_MEMBER (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each organization member
-    userid INTEGER NOT NULL,   -- Foreign key referencing the USER table
-    orgid INTEGER NOT NULL,    -- Foreign key referencing the ORGANIZATION table
-    FOREIGN KEY (userid) REFERENCES USER(id), -- Enforcing foreign key constraint
-    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) -- Enforcing foreign key constraint
+    id INTEGER PRIMARY KEY,
+    userid INTEGER NOT NULL,
+    orgid INTEGER NOT NULL,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE,
+    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) ON DELETE CASCADE
 );
 
--- Table to store the relationship between organization members and roles
 CREATE TABLE ORG_MEMBER_ROLE (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each organization member's role
-    memberid INTEGER NOT NULL, -- Foreign key referencing the ORG_MEMBER table
-    roleid INTEGER NOT NULL,   -- Foreign key referencing the ORG_ROLE table
-    FOREIGN KEY (memberid) REFERENCES ORG_MEMBER(id), -- Enforcing foreign key constraint
-    FOREIGN KEY (roleid) REFERENCES ORG_ROLE(id)     -- Enforcing foreign key constraint
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    memberid INTEGER NOT NULL,
+    roleid INTEGER NOT NULL,
+    FOREIGN KEY (memberid) REFERENCES ORG_MEMBER(id) ON DELETE CASCADE,
+    FOREIGN KEY (roleid) REFERENCES ORG_ROLE(id) ON DELETE CASCADE
 );
 
--- Table to store the relationship between organizations and their projects
 CREATE TABLE ORG_PROJECTS (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each organization-project relationship
-    orgid INTEGER NOT NULL,    -- Foreign key referencing the ORGANIZATION table
-    projectid INTEGER NOT NULL, -- Foreign key referencing the PROJECT table
-    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id), -- Enforcing foreign key constraint
-    FOREIGN KEY (projectid) REFERENCES PROJECT(id) -- Enforcing foreign key constraint
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    orgid INTEGER NOT NULL,
+    projectid INTEGER NOT NULL,
+    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) ON DELETE CASCADE,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
 );
 
--- Table to store members of projects
 CREATE TABLE PROJECT_MEMBER (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each project member
-    userid INTEGER NOT NULL,   -- Foreign key referencing the USER table
-    projectid INTEGER NOT NULL, -- Foreign key referencing the PROJECT table
-    FOREIGN KEY (userid) REFERENCES USER(id), -- Enforcing foreign key constraint
-    FOREIGN KEY (projectid) REFERENCES PROJECT(id) -- Enforcing foreign key constraint
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userid INTEGER NOT NULL,
+    projectid INTEGER NOT NULL,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
 );
 
--- Table to store the roles of project members
 CREATE TABLE PROJECT_MEMBER_ROLE (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each project member's role
-    memberid INTEGER NOT NULL, -- Foreign key referencing the PROJECT_MEMBER table
-    roleid INTEGER NOT NULL,   -- Foreign key referencing the PROJECT_ROLE table
-    FOREIGN KEY (memberid) REFERENCES PROJECT_MEMBER(id), -- Enforcing foreign key constraint
-    FOREIGN KEY (roleid) REFERENCES PROJECT_ROLE(id)      -- Enforcing foreign key constraint
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    memberid INTEGER NOT NULL,
+    roleid INTEGER NOT NULL,
+    FOREIGN KEY (memberid) REFERENCES PROJECT_MEMBER(id) ON DELETE CASCADE,
+    FOREIGN KEY (roleid) REFERENCES PROJECT_ROLE(id) ON DELETE CASCADE
 );
 
--- Table to store the relationship between projects and their issues
 CREATE TABLE PROJECT_ISSUES (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each project-issue relationship
-    projectid INTEGER NOT NULL, -- Foreign key referencing the PROJECT table
-    issueid INTEGER NOT NULL,   -- Foreign key referencing the ISSUE table
-    FOREIGN KEY (projectid) REFERENCES PROJECT(id), -- Enforcing foreign key constraint
-    FOREIGN KEY (issueid) REFERENCES ISSUE(id)     -- Enforcing foreign key constraint
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    projectid INTEGER NOT NULL,
+    issueid INTEGER NOT NULL,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE,
+    FOREIGN KEY (issueid) REFERENCES ISSUE(id) ON DELETE CASCADE
 );
 
--- Table to store the relationship between users and issues they are assigned to
 CREATE TABLE USER_ISSUES (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each user-issue relationship
-    userid INTEGER NOT NULL,   -- Foreign key referencing the USER table
-    issueid INTEGER NOT NULL,  -- Foreign key referencing the ISSUE table
-    FOREIGN KEY (userid) REFERENCES USER(id), -- Enforcing foreign key constraint
-    FOREIGN KEY (issueid) REFERENCES ISSUE(id) -- Enforcing foreign key constraint
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userid INTEGER NOT NULL,
+    issueid INTEGER NOT NULL,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE,
+    FOREIGN KEY (issueid) REFERENCES ISSUE(id) ON DELETE CASCADE,
+    UNIQUE (userid, issueid)
 );
 
--- Table to store the relationship between users and their reminders
-CREATE TABLE USER_REMINDER (
-    id INTEGER PRIMARY KEY,    -- Unique ID for each user-reminder relationship
-    userid INTEGER NOT NULL,   -- Foreign key referencing the USER table
-    reminderid INTEGER NOT NULL, -- Foreign key referencing the REMINDER table
-    FOREIGN KEY (userid) REFERENCES USER(id), -- Enforcing foreign key constraint
-    FOREIGN KEY (reminderid) REFERENCES REMINDER(id) -- Enforcing foreign key constraint
-);
+
+-- PRAGMA foreign_keys = OFF;
+
+-- DROP TABLE IF EXISTS REMINDER;
+-- DROP TABLE IF EXISTS USER_ISSUES;
+-- DROP TABLE IF EXISTS PROJECT_ISSUES;
+-- DROP TABLE IF EXISTS PROJECT_MEMBER_ROLE;
+-- DROP TABLE IF EXISTS PROJECT_MEMBER;
+-- DROP TABLE IF EXISTS ORG_PROJECTS;
+-- DROP TABLE IF EXISTS ORG_MEMBER_ROLE;
+-- DROP TABLE IF EXISTS ORG_MEMBER;
+-- DROP TABLE IF EXISTS PRIORITY;
+-- DROP TABLE IF EXISTS TAG;
+-- DROP TABLE IF EXISTS ISSUE;
+-- DROP TABLE IF EXISTS PROJECT_ROLE;
+-- DROP TABLE IF EXISTS PROJECT;
+-- DROP TABLE IF EXISTS SESSION;
+-- DROP TABLE IF EXISTS USER;
+-- DROP TABLE IF EXISTS VERIFY_USER;
+-- DROP TABLE IF EXISTS ORG_ROLE;
+-- DROP TABLE IF EXISTS ORGANIZATION;
+
+-- PRAGMA foreign_keys = ON;
