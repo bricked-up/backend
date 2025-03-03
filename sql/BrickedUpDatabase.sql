@@ -1,5 +1,3 @@
--- database: :memory:
-
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE ORGANIZATION (
@@ -154,6 +152,8 @@ CREATE TABLE USER_ISSUES (
     UNIQUE (userid, issueid)
 );
 
+
+-- Dropping all tables for tests. 
 
 -- PRAGMA foreign_keys = OFF;
 
