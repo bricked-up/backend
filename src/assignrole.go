@@ -1,98 +1,105 @@
 package backend
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
-
-	_ "modernc.org/sqlite"
+	"time"
 )
 
-// db is a global variable that holds the database connection.
-// It is initialized in the `init` function and used throughout the package.
-var db *sql.DB
+//assignOrgRoleToUser assigns a role to a user in an organization.
 
-// init initializes the database connection when the program starts.
-// This ensures that the database is ready to use when the package is imported.
-func init() {
-	var err error
-	//Open a connection to the SQLite database".
-	db, err = sql.Open("sqlite", "./bricked-up_prod.db")
-	if err != nil {
-		//If the connection fails, log the error and stop the program.
-		//This ensures the application does not run with a broken database connection.
-		log.Fatal("Database connection failed:", err)
-	}
-}
-
-// assignOrgRoleToUser assigns a role to a user in an organization.
-// It takes the following parameters:
-//   - userID: The ID of the user to whom the role will be assigned.
-//   - orgID: The ID of the organization where the role will be assigned.
-//   - roleID: The ID of the role to assign to the user.
+//   - sessionIDA: Session ID of User A (the user making the change).
+//   - sessionIDB: Session ID of User B (the user whose role is being changed).
+//   - roleID: The ID of the new role to assign to User B.
+//   - orgID: The ID of the organization where the role change is happening
 //
 // It returns an error if the assignment fails.
-func assignOrgRoleToUser(userID, orgID, roleID int) error {
-	//Check if the user exists in the USER table.
-	var userExists bool
-	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM USER WHERE id = ?)", userID).Scan(&userExists)
+func assignOrgRoleToUser(sessionIDA, sessionIDB string, roleID, orgID int) error {
+	//Validate User A's session and permissions
+	userAID, err := validateSessionAndPermissions(sessionIDA, orgID)
 	if err != nil {
-		//If the query fails, return an error with details.
-		return fmt.Errorf("failed to check user existence: %v", err)
-	}
-	if !userExists {
-		//If the user does not exist, return an error.
-		return fmt.Errorf("user with ID %d does not exist", userID)
+		return fmt.Errorf("user A validation failed: %v", err)
 	}
 
-	//Check if the organization exists in the ORGANIZATION table.
-	var orgExists bool
-	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM ORGANIZATION WHERE id = ?)", orgID).Scan(&orgExists)
+	//Validate User B's session and membership in the organization
+	userBID, err := validateUserSessionAndMembership(sessionIDB, orgID)
 	if err != nil {
-		//If the query fails, return an error with details.
-		return fmt.Errorf("failed to check organization existence: %v", err)
-	}
-	if !orgExists {
-		//If the organization does not exist, return an error.
-		return fmt.Errorf("organization with ID %d does not exist", orgID)
+		return fmt.Errorf("user B validation failed: %v", err)
 	}
 
-	//Check if the role exists in the ORG_ROLE table for the given organization.
-	var roleExists bool
-	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM ORG_ROLE WHERE id = ? AND orgid = ?)", roleID, orgID).Scan(&roleExists)
+	//Check if User B already has the role
+	var hasRole bool
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM ORG_MEMBER WHERE userid = ? AND orgid = ? AND roleid = ?)", userBID, orgID, roleID).Scan(&hasRole)
 	if err != nil {
-		// If the query fails, return an error with details.
-		return fmt.Errorf("failed to check role existence: %v", err)
+		return fmt.Errorf("failed to check if user B already has the role: %v", err)
 	}
-	if !roleExists {
-		// If the role does not exist in the organization, return an error.
-		return fmt.Errorf("role with ID %d does not exist in organization %d", roleID, orgID)
+	if hasRole {
+		return fmt.Errorf("user B already has the role %d in organization %d", roleID, orgID)
 	}
 
-	//Check if the user is already a member of the organization.
+	//Update User B's role in the organization
+	_, err = db.Exec("UPDATE ORG_MEMBER SET roleid = ? WHERE userid = ? AND orgid = ?", roleID, userBID, orgID)
+	if err != nil {
+		return fmt.Errorf("failed to update user B's role: %v", err)
+	}
+
+	//Log the role change
+	logRoleChange(userAID, userBID, roleID, orgID)
+
+	return nil
+}
+
+// validateSessionAndPermissions validates User A's session and checks if they have exec permission in the organization.
+func validateSessionAndPermissions(sessionID string, orgID int) (int, error) {
+	var userID int
+	var execPermission bool
+
+	//Validate User A's session
+	err := db.QueryRow("SELECT userid FROM SESSION WHERE token = ? AND expires > ?", sessionID, time.Now()).Scan(&userID)
+	if err != nil {
+		return 0, fmt.Errorf("invalid session for User A: %v", err)
+	}
+
+	//Check if User A has exec permission in the organization
+	err = db.QueryRow("SELECT exec FROM ORG_MEMBER WHERE userid = ? AND orgid = ?", userID, orgID).Scan(&execPermission)
+	if err != nil {
+		return 0, fmt.Errorf("failed to check User A's permissions: %v", err)
+	}
+	if !execPermission {
+		return 0, fmt.Errorf("user A does not have exec permission in organization %d", orgID)
+	}
+
+	return userID, nil
+}
+
+// validateUserSessionAndMembership validates User B's session and checks if they are a member of the organization
+func validateUserSessionAndMembership(sessionID string, orgID int) (int, error) {
+	var userID int
+
+	//Validate User B's session
+	err := db.QueryRow("SELECT userid FROM SESSION WHERE token = ? AND expires > ?", sessionID, time.Now()).Scan(&userID)
+	if err != nil {
+		return 0, fmt.Errorf("invalid session for User B: %v", err)
+	}
+
+	//Check if User B is a member of the organization
 	var isMember bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM ORG_MEMBER WHERE userid = ? AND orgid = ?)", userID, orgID).Scan(&isMember)
 	if err != nil {
-		//If the query fails, return an error with details.
-		return fmt.Errorf("failed to check organization membership: %v", err)
+		return 0, fmt.Errorf("failed to check User B's membership: %v", err)
+	}
+	if !isMember {
+		return 0, fmt.Errorf("user B is not a member of organization %d", orgID)
 	}
 
-	if isMember {
-		//If the user is already a member, update their role in the ORG_MEMBER table.
-		_, err = db.Exec("UPDATE ORG_MEMBER SET roleid = ? WHERE userid = ? AND orgid = ?", roleID, userID, orgID)
-		if err != nil {
-			// If the update fails, return an error with details.
-			return fmt.Errorf("failed to update user role: %v", err)
-		}
-	} else {
-		//If the user is not a member, add them to the organization with the specified role.
-		_, err = db.Exec("INSERT INTO ORG_MEMBER (userid, orgid, roleid) VALUES (?, ?, ?)", userID, orgID, roleID)
-		if err != nil {
-			// If the insert fails, return an error with details.
-			return fmt.Errorf("failed to assign role to user: %v", err)
-		}
-	}
+	return userID, nil
+}
 
-	//If everything succeeds, return nil (no error).
-	return nil
+// logRoleChange logs the role change for auditing purposes.
+func logRoleChange(userAID, userBID, roleID, orgID int) {
+	//Insert a log entry into the database
+	_, err := db.Exec("INSERT INTO ROLE_CHANGE_LOG (user_a_id, user_b_id, role_id, org_id, change_time) VALUES (?, ?, ?, ?, ?)", userAID, userBID, roleID, orgID, time.Now())
+	if err != nil {
+		log.Printf("Failed to log role change: %v", err)
+	}
 }
