@@ -1,138 +1,179 @@
---SQL Queries for creating the BrickedUp database.
-
--- Enable foreign key constraints in SQLite.
 PRAGMA foreign_keys = ON;
 
--- Organization table
-CREATE TABLE organization (
-    id INTEGER PRIMARY KEY,
+CREATE TABLE ORGANIZATION (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL
 );
 
--- Organization roles table
-CREATE TABLE organization_role (
-    id INTEGER PRIMARY KEY,
-    organization_id INTEGER,
+CREATE TABLE ORG_ROLE (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    orgid INTEGER NOT NULL,
     name TEXT NOT NULL,
-    can_read BOOLEAN DEFAULT 0,
-    can_write BOOLEAN DEFAULT 0,
-    can_execute BOOLEAN DEFAULT 0,
-    FOREIGN KEY (organization_id) REFERENCES organization(id)
+    can_read BOOLEAN NOT NULL,
+    can_write BOOLEAN NOT NULL,
+    can_exec BOOLEAN NOT NULL,
+    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) ON DELETE CASCADE
 );
 
--- User table
-CREATE TABLE user (
-    id INTEGER PRIMARY KEY,
-    username TEXT NOT NULL UNIQUE
-    password TEXT NOT NULL
+CREATE TABLE VERIFY_USER (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code INTEGER UNIQUE NOT NULL,
+    expires DATE NOT NULL
 );
 
--- Organization members table
-CREATE TABLE organization_member (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER,
-    organization_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (organization_id) REFERENCES organization(id)
-);
-
--- Project table
-CREATE TABLE project (
-    id INTEGER PRIMARY KEY,
-    organization_id INTEGER,
+CREATE TABLE USER (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    verifyid INTEGER,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
     name TEXT NOT NULL,
-    budget INTEGER CHECK (budget >= 0),
-    charter TEXT,
-    is_archived BOOLEAN DEFAULT 0,
-    FOREIGN KEY (organization_id) REFERENCES organization(id)
+    avatar TEXT,
+    FOREIGN KEY (verifyid) REFERENCES VERIFY_USER(id) ON DELETE SET NULL
 );
 
--- Project roles table
-CREATE TABLE project_role (
-    id INTEGER PRIMARY KEY,
-    project_id INTEGER,
+CREATE TABLE SESSION (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userid INTEGER NOT NULL,
+    expires DATE NOT NULL,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE
+);
+
+CREATE TABLE PROJECT (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    orgid INTEGER NOT NULL,
     name TEXT NOT NULL,
-    can_read BOOLEAN DEFAULT 0,
-    can_write BOOLEAN DEFAULT 0,
-    can_execute BOOLEAN DEFAULT 0,
-    FOREIGN KEY (project_id) REFERENCES project(id)
+    budget INTEGER NOT NULL,
+    charter TEXT NOT NULL,
+    archived BOOLEAN NOT NULL,
+    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) ON DELETE CASCADE
 );
 
--- Project members table
-CREATE TABLE project_member (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER,
-    project_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (project_id) REFERENCES project(id)
+CREATE TABLE PROJECT_ROLE (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    projectid INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    can_read BOOLEAN NOT NULL,
+    can_write BOOLEAN NOT NULL,
+    can_exec BOOLEAN NOT NULL,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
 );
 
--- Issues table
-CREATE TABLE issue (
-    id INTEGER PRIMARY KEY,
-    title TEXT NOT NULL,
-    description TEXT,
-    tag_id INTEGER,
-    priority_id INTEGER,
-    created_at DATE NOT NULL,
-    completed_at DATE,
-    cost INTEGER CHECK (cost >= 0),
-    FOREIGN KEY (tag_id) REFERENCES tag(id),
-    FOREIGN KEY (priority_id) REFERENCES priority(id)
-);
-
--- Tags table
-CREATE TABLE tag (
-    id INTEGER PRIMARY KEY,
-    project_id INTEGER,
+CREATE TABLE TAG (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    projectid INTEGER NOT NULL,
     name TEXT NOT NULL,
     color TEXT NOT NULL,
-    FOREIGN KEY (project_id) REFERENCES project(id)
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
 );
 
--- Priorities table
-CREATE TABLE priority (
-    id INTEGER PRIMARY KEY,
-    project_id INTEGER,
+CREATE TABLE PRIORITY (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    projectid INTEGER NOT NULL,
     name TEXT NOT NULL,
-    priority_level INTEGER CHECK (priority_level >= 1),
-    FOREIGN KEY (project_id) REFERENCES project(id)
+    priority INTEGER NOT NULL,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
 );
 
--- Organization projects table (many-to-many)
-CREATE TABLE organization_project (
+CREATE TABLE ISSUE (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    desc TEXT NOT NULL,
+    tagid INTEGER,
+    priorityid INTEGER,
+    created DATE NOT NULL,
+    completed DATE,
+    cost INTEGER NOT NULL,
+    FOREIGN KEY (tagid) REFERENCES TAG(id) ON DELETE SET NULL,
+    FOREIGN KEY (priorityid) REFERENCES PRIORITY(id) ON DELETE SET NULL
+);
+
+CREATE TABLE REMINDER (
     id INTEGER PRIMARY KEY,
-    organization_id INTEGER,
-    project_id INTEGER,
-    FOREIGN KEY (organization_id) REFERENCES organization(id),
-    FOREIGN KEY (project_id) REFERENCES project(id)
+    issueid INTEGER NOT NULL,
+    userid INTEGER NOT NULL,
+    FOREIGN KEY (issueid) REFERENCES ISSUE(id) ON DELETE CASCADE,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE
 );
 
--- Project issues table (many-to-many)
-CREATE TABLE project_issue (
+CREATE TABLE ORG_MEMBER (
     id INTEGER PRIMARY KEY,
-    project_id INTEGER,
-    issue_id INTEGER,
-    FOREIGN KEY (project_id) REFERENCES project(id),
-    FOREIGN KEY (issue_id) REFERENCES issue(id)
+    userid INTEGER NOT NULL,
+    orgid INTEGER NOT NULL,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE,
+    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) ON DELETE CASCADE
 );
 
--- User issues table (many-to-many)
-CREATE TABLE user_issue (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER,
-    issue_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (issue_id) REFERENCES issue(id)
+CREATE TABLE ORG_MEMBER_ROLE (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    memberid INTEGER NOT NULL,
+    roleid INTEGER NOT NULL,
+    FOREIGN KEY (memberid) REFERENCES ORG_MEMBER(id) ON DELETE CASCADE,
+    FOREIGN KEY (roleid) REFERENCES ORG_ROLE(id) ON DELETE CASCADE
 );
 
--- Reminders table
-CREATE TABLE reminder (
-    id INTEGER PRIMARY KEY,
-    issue_id INTEGER,
-    user_id INTEGER,
-    FOREIGN KEY (issue_id) REFERENCES issue(id),
-    FOREIGN KEY (user_id) REFERENCES user(id)
+CREATE TABLE ORG_PROJECTS (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    orgid INTEGER NOT NULL,
+    projectid INTEGER NOT NULL,
+    FOREIGN KEY (orgid) REFERENCES ORGANIZATION(id) ON DELETE CASCADE,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
+);
+
+CREATE TABLE PROJECT_MEMBER (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userid INTEGER NOT NULL,
+    projectid INTEGER NOT NULL,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE
+);
+
+CREATE TABLE PROJECT_MEMBER_ROLE (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    memberid INTEGER NOT NULL,
+    roleid INTEGER NOT NULL,
+    FOREIGN KEY (memberid) REFERENCES PROJECT_MEMBER(id) ON DELETE CASCADE,
+    FOREIGN KEY (roleid) REFERENCES PROJECT_ROLE(id) ON DELETE CASCADE
+);
+
+CREATE TABLE PROJECT_ISSUES (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    projectid INTEGER NOT NULL,
+    issueid INTEGER NOT NULL,
+    FOREIGN KEY (projectid) REFERENCES PROJECT(id) ON DELETE CASCADE,
+    FOREIGN KEY (issueid) REFERENCES ISSUE(id) ON DELETE CASCADE
+);
+
+CREATE TABLE USER_ISSUES (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userid INTEGER NOT NULL,
+    issueid INTEGER NOT NULL,
+    FOREIGN KEY (userid) REFERENCES USER(id) ON DELETE CASCADE,
+    FOREIGN KEY (issueid) REFERENCES ISSUE(id) ON DELETE CASCADE,
+    UNIQUE (userid, issueid)
 );
 
 
+-- Dropping all tables for tests. 
+
+-- PRAGMA foreign_keys = OFF;
+
+-- DROP TABLE IF EXISTS REMINDER;
+-- DROP TABLE IF EXISTS USER_ISSUES;
+-- DROP TABLE IF EXISTS PROJECT_ISSUES;
+-- DROP TABLE IF EXISTS PROJECT_MEMBER_ROLE;
+-- DROP TABLE IF EXISTS PROJECT_MEMBER;
+-- DROP TABLE IF EXISTS ORG_PROJECTS;
+-- DROP TABLE IF EXISTS ORG_MEMBER_ROLE;
+-- DROP TABLE IF EXISTS ORG_MEMBER;
+-- DROP TABLE IF EXISTS PRIORITY;
+-- DROP TABLE IF EXISTS TAG;
+-- DROP TABLE IF EXISTS ISSUE;
+-- DROP TABLE IF EXISTS PROJECT_ROLE;
+-- DROP TABLE IF EXISTS PROJECT;
+-- DROP TABLE IF EXISTS SESSION;
+-- DROP TABLE IF EXISTS USER;
+-- DROP TABLE IF EXISTS VERIFY_USER;
+-- DROP TABLE IF EXISTS ORG_ROLE;
+-- DROP TABLE IF EXISTS ORGANIZATION;
+
+-- PRAGMA foreign_keys = ON;
