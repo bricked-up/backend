@@ -7,7 +7,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// verifyUser verifies the user's email using the provided verification code.
+// VerifyUser verifies the user's email using the provided verification code.
 // It removes all expired verification codes from the database and sets the user's
 // verifyid to NULL if the verification code is correct and has not expired.
 func VerifyUser(verificationCode string) error {
