@@ -7,8 +7,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const dbPath = "backend/sql/BrickedUpDatabase.sql"
-
 // CreateOrganization creates a new organization and assigns the user (from the session) to it as an admin.
 // It takes sessionID and orgName as parameters instead of extracting them from the request.
 func CreateOrganization(sessionID, orgName string) (int, error) {
@@ -18,7 +16,7 @@ func CreateOrganization(sessionID, orgName string) (int, error) {
 	}
 
 	// Open the database
-	db, err := sql.Open("sqlite", dbPath)
+	db, err := sql.Open("sqlite", "backend/sql/init.sql")
 	if err != nil {
 		return 0, err
 	}
