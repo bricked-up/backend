@@ -15,7 +15,6 @@ import (
 )
 
 const PORT = ":3100" // Server port number.
-
 // Main sets up the server and starts listening on the defined PORT.
 // It registers MainHandler to process all incoming HTTP requests.
 func main() {
