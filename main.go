@@ -1,7 +1,7 @@
 package main
 
 import (
-	backend "brickedup/backend/src"
+	"brickedup/backend/src/backend"
 	"log"
 	"net/http"
 )
