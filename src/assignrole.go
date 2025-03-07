@@ -8,104 +8,102 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-var db *sql.DB
+/*AssignProjectRoleToUser assigns a new role to a user(assignee) in a project.
+It ensures that assignor has exec permission, assignee is validated and the role is not already assigned.*/
 
-/*assignProjectRoleToUser assigns a new role to User B in a project.
-It ensures that User A has exec permission, User B is validated and the role is not already assigned.*/
-
-func assignProjectRoleToUser(sessionIDA, sessionIDB string, roleID, projectID int) error {
-	// Validate that the project exists
+func assignProjectRoleToUser(db *sql.DB, sessionIDA, sessionIDB string, roleID, projectID int) error {
+	//Validate that the project exists
 	var projectExists bool
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM PROJECT WHERE id = ?)", projectID).Scan(&projectExists)
 	if err != nil {
-		return fmt.Errorf("failed to check project existence: %v", err)
+		return err
 	}
 	if !projectExists {
-		return fmt.Errorf("project %d does not exist", projectID)
+		return err
 	}
 
-	//Validate User A's session and permissions
-	_, err = validateSessionAndExecPermission(sessionIDA, projectID)
+	//Validate Assignor's session and permissions
+	_, err = validateSessionAndExecPermission(db, sessionIDA, projectID)
 	if err != nil {
-		return fmt.Errorf("assignor validation failed: %v", err)
+		return err
 	}
 
 	//Validate User B's session, membership and verification status
-	userBID, err := validateUserSessionMembershipAndVerification(sessionIDB, projectID)
+	userBID, err := validateUserSessionMembershipAndVerification(db, sessionIDB, projectID)
 	if err != nil {
-		return fmt.Errorf("assignee validation failed: %v", err)
+		return err
 	}
 
-	//Check if User B already has the role
+	//Check if Assignee already has the role
 	var hasRole bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM PROJECT_MEMBER WHERE userid = ? AND projectid = ? AND roleid = ?)", userBID, projectID, roleID).Scan(&hasRole)
 	if err != nil {
-		return fmt.Errorf("failed to check if assignee already has the role: %v", err)
+		return err
 	}
 	if hasRole {
-		return fmt.Errorf("assignee already has the role %d in project %d", roleID, projectID)
+		return err
 	}
 
-	//Update User B's role in the project
+	//Update Assignee's role in the project
 	_, err = db.Exec("UPDATE PROJECT_MEMBER SET roleid = ? WHERE userid = ? AND projectid = ?", roleID, userBID, projectID)
 	if err != nil {
-		return fmt.Errorf("failed to update assignee's role: %v", err)
+		return err
 	}
 
 	return nil
 }
 
-// validateSessionAndExecPermission ensures User A's session is valid and they have exec permission in the project.
-func validateSessionAndExecPermission(sessionID string, projectID int) (int, error) {
+// ValidateSessionAndExecPermission ensures Assignor's session is valid and they have exec permission in the project.
+func validateSessionAndExecPermission(db *sql.DB, sessionID string, projectID int) (int, error) {
 	var userID int
-	var execPermission bool
+	var hasExecPermission bool
 
-	//Validate User A's session
+	//Validate Assignor's session
 	err := db.QueryRow("SELECT userid FROM SESSION WHERE token = ? AND expires > ?", sessionID, time.Now()).Scan(&userID)
 	if err != nil {
-		return 0, fmt.Errorf("Invalid session for assignor: %v", err)
+		return 0, err
 	}
 
-	//Check if User A has exec permission in the project
-	err = db.QueryRow("SELECT exec FROM PROJECT_MEMBER WHERE userid = ? AND projectid = ?", userID, projectID).Scan(&execPermission)
+	//Check if assignor has exec permission in the project
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM PROJECT_MEMBER_ROLE pmr JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id JOIN PROJECT_MEMBER pm ON pmr.memberid = pm.id WHERE pm.userid = ? AND pm.projectid = ? AND pr.can_exec = TRUE)", userID, projectID).Scan(&hasExecPermission)
 	if err != nil {
-		return 0, fmt.Errorf("Failed to check User A's permissions: %v", err)
+		return 0, err
 	}
-	if !execPermission {
-		return 0, fmt.Errorf("Assignor does not have exec permission in project %d", projectID)
+	if !hasExecPermission {
+		return 0, fmt.Errorf("user does not have exec permission")
 	}
 
 	return userID, nil
 }
 
-// validateUserSessionMembershipAndVerification ensures User B's session is valid, they are a project member, and verified
-func validateUserSessionMembershipAndVerification(sessionID string, projectID int) (int, error) {
+// ValidateUserSessionMembershipAndVerification ensures assignee's session is valid, they are a project member and verified
+func validateUserSessionMembershipAndVerification(db *sql.DB, sessionID string, projectID int) (int, error) {
 	var userID int
 	var isMember bool
 	var isVerified int
 
-	//Validate User B's session
+	//Validate Assignee's session
 	err := db.QueryRow("SELECT userid FROM SESSION WHERE token = ? AND expires > ?", sessionID, time.Now()).Scan(&userID)
 	if err != nil {
-		return 0, fmt.Errorf("Invalid session for User B: %v", err)
+		return 0, err
 	}
 
-	//Check if User B is a member of the project
+	//Check if Assignee is a member of the project
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM PROJECT_MEMBER WHERE userid = ? AND projectid = ?)", userID, projectID).Scan(&isMember)
 	if err != nil {
-		return 0, fmt.Errorf("Failed to check User B's membership: %v", err)
+		return 0, err
 	}
 	if !isMember {
-		return 0, fmt.Errorf("User B is not a member of project %d", projectID)
+		return 0, err
 	}
 
-	//Check if User B is verified
+	//Check if assignee is verified
 	err = db.QueryRow("SELECT verifyid FROM USER WHERE id = ?", userID).Scan(&isVerified)
 	if err != nil {
-		return 0, fmt.Errorf("Failed to check User B's verification status: %v", err)
+		return 0, err
 	}
 	if isVerified == 0 {
-		return 0, fmt.Errorf("User B is not verified")
+		return 0, err
 	}
 
 	return userID, nil
