@@ -5,7 +5,8 @@ import (
     "errors"
     "log"
     "strconv"
-    _ "github.com/mattn/go-sqlite3"
+
+	_ "modernc.org/sqlite" 
 )
 
 // ChangeDisplayName retrieves the user ID from the SESSION table (by sessionID)
