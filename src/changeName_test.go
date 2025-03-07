@@ -1,53 +1,56 @@
 package backend
 
-// Commented out the tests as the db is not updated yet 
+import (
+    "database/sql"
+    "testing"
 
-// import (
-//     "database/sql"
-//     "testing"
+    _ "github.com/mattn/go-sqlite3"
+)
 
-//     _ "github.com/mattn/go-sqlite3"
-// )
+// TestUpdateUserName demonstrates using an in-memory DB to test ChangeDisplayName.
+func TestUpdateUserName(t *testing.T) {
+    // Open an in-memory database (nothing is written to disk).
+    db, err := sql.Open("sqlite3", ":memory:")
+    if err != nil {
+        t.Fatalf("failed to open in-memory db: %v", err)
+    }
+    defer db.Close()
 
-// // TestUpdateUserName verifies that the ChangeDisplayName function correctly updates a user's name.
-// func TestUpdateUserName(t *testing.T) {
-//     // Open an in-memory database for testing.
-//     dbase, err := sql.Open("sqlite3", ":memory:")
-//     if err != nil {
-//         t.Fatalf("failed to open in-memory db: %v", err)
-//     }
-//     defer dbase.Close()
+    // Create the necessary tables (USER, SESSION) for the test.
+    _, err = db.Exec(`
+        CREATE TABLE USER (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL
+        );
+        CREATE TABLE SESSION (
+            id INTEGER PRIMARY KEY,
+            userid INTEGER NOT NULL
+        );
 
-//     // Create the USER table and insert a sample user row.
-//     _, err = dbase.Exec(`
-//         CREATE TABLE USER (
-//             id INTEGER PRIMARY KEY,
-//             verifyid INTEGER,
-//             email TEXT UNIQUE NOT NULL,
-//             password TEXT NOT NULL,
-//             name TEXT NOT NULL,
-//             avatar TEXT UNIQUE NOT NULL
-//         );
-//         INSERT INTO USER (id, email, password, name, avatar)
-//         VALUES (1, 'alice@example.com', 'password123', 'Alice', 'alice.png');
-//     `)
-//     if err != nil {
-//         t.Fatalf("failed to create schema or insert test data: %v", err)
-//     }
+        -- Insert sample data: 
+        -- User #1 = "Alice"
+        INSERT INTO USER (id, name) VALUES (1, 'Alice');
 
-//     // Call the function to update the user's name to "Ivan".
-//     err = ChangeDisplayName(1, "Ivan")
-//     if err != nil {
-//         t.Errorf("UpdateUserName returned error: %v", err)
-//     }
+        -- Session #1 -> userID=1
+        INSERT INTO SESSION (id, userid) VALUES (1, 1);
+    `)
+    if err != nil {
+        t.Fatalf("failed to create schema or insert test data: %v", err)
+    }
 
-//     // Query the database to verify that the name was updated.
-//     var updatedName string
-//     err = dbase.QueryRow("SELECT name FROM USER WHERE id = 1").Scan(&updatedName)
-//     if err != nil {
-//         t.Errorf("failed to select updated name: %v", err)
-//     }
-//     if updatedName != "Ivan" {
-//         t.Errorf("expected name 'Ivan', got '%s'", updatedName)
-//     }
-// }
+    // Call the refactored function, passing the in-memory DB and sessionID=1.
+    err = ChangeDisplayName(db, 1, "Ivan")
+    if err != nil {
+        t.Errorf("ChangeDisplayName returned error: %v", err)
+    }
+
+    // Verify the name was updated to "Ivan".
+    var updatedName string
+    err = db.QueryRow("SELECT name FROM USER WHERE id = 1").Scan(&updatedName)
+    if err != nil {
+        t.Errorf("failed to query updated name: %v", err)
+    }
+    if updatedName != "Ivan" {
+        t.Errorf("expected 'Ivan', got '%s'", updatedName)
+    }
+}
