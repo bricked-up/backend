@@ -15,10 +15,7 @@ func assignProjectRoleToUser(db *sql.DB, sessionIDA, sessionIDB string, roleID, 
 	//Validate that the project exists
 	var projectExists bool
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM PROJECT WHERE id = ?)", projectID).Scan(&projectExists)
-	if err != nil {
-		return err
-	}
-	if !projectExists {
+	if err != nil || !projectExists {
 		return err
 	}
 
@@ -28,7 +25,7 @@ func assignProjectRoleToUser(db *sql.DB, sessionIDA, sessionIDB string, roleID, 
 		return err
 	}
 
-	//Validate User B's session, membership and verification status
+	//Validate User B's session and get their UserID
 	userBID, err := validateUserSessionMembershipAndVerification(db, sessionIDB, projectID)
 	if err != nil {
 		return err
@@ -37,20 +34,13 @@ func assignProjectRoleToUser(db *sql.DB, sessionIDA, sessionIDB string, roleID, 
 	//Check if Assignee already has the role
 	var hasRole bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM PROJECT_MEMBER WHERE userid = ? AND projectid = ? AND roleid = ?)", userBID, projectID, roleID).Scan(&hasRole)
-	if err != nil {
-		return err
-	}
-	if hasRole {
+	if err != nil || hasRole {
 		return err
 	}
 
 	//Update Assignee's role in the project
 	_, err = db.Exec("UPDATE PROJECT_MEMBER SET roleid = ? WHERE userid = ? AND projectid = ?", roleID, userBID, projectID)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // ValidateSessionAndExecPermission ensures Assignor's session is valid and they have exec permission in the project.
