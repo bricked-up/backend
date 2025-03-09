@@ -4,13 +4,13 @@ import (
     "database/sql"
     "testing"
 
-    _ "github.com/mattn/go-sqlite3"
+    _ "modernc.org/sqlite"
 )
 
-// TestUpdateUserName demonstrates using an in-memory DB to test ChangeDisplayName.
+// TestUpdateUserName demonstrates using an in-memory DB to test ChangeDisplayName
 func TestUpdateUserName(t *testing.T) {
-    // Open an in-memory database (nothing is written to disk).
-    db, err := sql.Open("sqlite3", ":memory:")
+    // Open an in-memory database with the modernc driver name "sqlite".
+    db, err := sql.Open("sqlite", ":memory:")
     if err != nil {
         t.Fatalf("failed to open in-memory db: %v", err)
     }
@@ -27,11 +27,8 @@ func TestUpdateUserName(t *testing.T) {
             userid INTEGER NOT NULL
         );
 
-        -- Insert sample data: 
-        -- User #1 = "Alice"
+        -- Insert sample data:
         INSERT INTO USER (id, name) VALUES (1, 'Alice');
-
-        -- Session #1 -> userID=1
         INSERT INTO SESSION (id, userid) VALUES (1, 1);
     `)
     if err != nil {
