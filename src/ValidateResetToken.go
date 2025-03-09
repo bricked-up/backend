@@ -2,30 +2,17 @@ package backend
 
 import (
 	"database/sql"
-	"fmt"
-	"time"
 
 	_ "modernc.org/sqlite"
 )
 
-func RequestPasswordReset(token string, userEmail string) (string, error) {
+func RequestPasswordReset(token string, userEmail string, db *sql.DB) (string, error) {
 	var email string
-	var expiry time.Time
-
-	db, err := sql.Open("sqlite", "bricked-up_prod.db")
-	if err != nil {
-		return "", fmt.Errorf("failed to launch the database")
-	}
-
-	err = db.QueryRow("SELECT email, reset_token_expires FROM users WHERE reset_token = ?", token).Scan(&email, &expiry)
+	err := db.QueryRow("SELECT email FROM reset WHERE reset_token = ? AND reset_token_expires = 1", token).Scan(&email)
 	if err == sql.ErrNoRows {
-		return "", fmt.Errorf("expired or invalid token")
+		return "", err
 	} else if err != nil {
 		return "", err
-	}
-
-	if time.Now().After(expiry) {
-		return "", fmt.Errorf("expired token")
 	}
 	db.Close()
 	return email, nil
