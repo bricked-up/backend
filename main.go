@@ -1,12 +1,13 @@
 package main
 
 import (
-    backend "brickedup/backend/src"
-    "database/sql"
-    "log"
-    "net/http"
+	backend "brickedup/backend/src"
+	"database/sql"
+	"log"
+	"net/http"
+	"os"
 
-    _ "modernc.org/sqlite"
+	_ "modernc.org/sqlite"
 )
 
 const PORT = ":3100" // Server port number.
@@ -16,7 +17,7 @@ const PORT = ":3100" // Server port number.
 func main() {
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
-        db, err := sql.Open("sqlite3", "bricked-up_prod.db")
+        db, err := sql.Open("sqlite3", os.Getenv("DB"))
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             log.Panic(err)
