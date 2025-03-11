@@ -1,10 +1,11 @@
 package backend
 
 import (
-    "database/sql"
-    "testing"
+	"database/sql"
+	"os"
+	"testing"
 
-    _ "modernc.org/sqlite"
+	_ "modernc.org/sqlite"
 )
 
 // TestUpdateUserName demonstrates using an in-memory DB to test ChangeDisplayName
@@ -16,23 +17,26 @@ func TestUpdateUserName(t *testing.T) {
     }
     defer db.Close()
 
-    // Create the necessary tables (USER, SESSION) for the test.
-    _, err = db.Exec(`
-        CREATE TABLE USER (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL
-        );
-        CREATE TABLE SESSION (
-            id INTEGER PRIMARY KEY,
-            userid INTEGER NOT NULL
-        );
+	// Open the init.sql file and exec:
+	initSQL, err := os.ReadFile("../sql/init.sql")
+	if err != nil {
+		t.Fatalf("failed to open init.sql %v", err)
+	}
+	defer db.Close()
 
-        -- Insert sample data:
-        INSERT INTO USER (id, name) VALUES (1, 'Alice');
-        INSERT INTO SESSION (id, userid) VALUES (1, 1);
-    `)
-    if err != nil {
-        t.Fatalf("failed to create schema or insert test data: %v", err)
+	if _, err := db.Exec(string(initSQL)); err != nil {
+        t.Fatalf("failed to exec init.sql: %v", err)
+    }
+	
+	// Open the populate.sql file and exec:
+	populateSQL, err := os.ReadFile("../sql/populate.sql")
+	if err != nil {
+		t.Fatalf("failed to open populate.sql %v", err)
+	}
+	defer db.Close()
+
+	if _, err := db.Exec(string(populateSQL)); err != nil {
+        t.Fatalf("failed to exec populate.sql: %v", err)
     }
 
     // Call the refactored function, passing the in-memory DB and sessionID=1.

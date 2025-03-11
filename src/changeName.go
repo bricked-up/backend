@@ -12,7 +12,6 @@ import (
 // and updates that user's name in the USER table without printing errors to stdout.
 func ChangeDisplayName(db *sql.DB, sessionID int, newName string) error {
     
-
     // Look up the userID in the SESSION table.
     var userID int
     err := db.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
