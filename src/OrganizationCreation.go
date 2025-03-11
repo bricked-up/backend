@@ -7,25 +7,17 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const dbPath = "backend/sql/BrickedUpDatabase.sql"
-
 // CreateOrganization creates a new organization and assigns the user (from the session) to it as an admin.
 // It takes sessionID and orgName as parameters instead of extracting them from the request.
-func CreateOrganization(sessionID, orgName string) (int, error) {
+func CreateOrganization(db *sql.DB, sessionID, orgName string) (int, error) {
 	// Check if sessionID and orgName are provided
 	if sessionID == "" || orgName == "" {
 		return 0, errors.New("missing sessionID or orgName")
 	}
 
-	// Open the database
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		return 0, err
-	}
-	defer db.Close()
-
 	// Validate session ID and retrieve the user ID associated with it
 	var userID int
+	var err error
 	err = db.QueryRow("SELECT user_id FROM sessions WHERE session_id = ?", sessionID).Scan(&userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
