@@ -40,11 +40,7 @@ func sendVerificationEmail(to, code string) {
 }
 
 // RegisterUser handles user registration
-func registerUser(email, password string) error {
-	db, err := sql.Open("sqlite3", "bricked-up_prod.db")
-	if err != nil {
-		return err
-	}
+func registerUser(db *sql.DB, email, password string) error {
 
 	// User added to database
 	res, err := db.Exec("INSERT INTO users (email, password) VALUES (?, ?)", email, password)
