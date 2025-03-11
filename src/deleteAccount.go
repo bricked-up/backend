@@ -7,21 +7,16 @@ import (
 )
 
 // DeleteUser deletes a user from the users table
-func deleteUser(sessionid string) error {
-	db, err := sql.Open("sqlite", "bricked-up_prod.db")
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
+func deleteUser(db *sql.DB, sessionid string) error {
 	// Retrieve user_id from session table
 	var userID string
-	err = db.QueryRow("SELECT user_id FROM session WHERE id = ?", sessionid).Scan(&userID)
+	err := db.QueryRow("SELECT user_id FROM session WHERE id = ?", sessionid).Scan(&userID)
 	if err != nil {
 		return err
 	}
+
 	// Delete user from users table
-	_, err = db.Exec("DELETE FROM users WHERE id = ? LIMIT 1", userID)
+	_, err = db.Exec("DELETE FROM users WHERE id = ?", userID)
 	if err != nil {
 		return err
 	}
