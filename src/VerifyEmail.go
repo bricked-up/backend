@@ -16,17 +16,18 @@ func VerifyUser(verificationCode string, db *sql.DB) error {
 		return err
 	}
 
+	// Verify the provided verification code
 	var userID int
 	err = db.QueryRow("SELECT user_id FROM verification_codes WHERE code = ? AND expires_at >= ?", verificationCode, time.Now()).Scan(&userID)
 	if err != nil {
 		return err
 	}
 
+	// Set user's verifyid to NULL
 	_, err = db.Exec("UPDATE user SET verifyid = NULL WHERE id = ?", userID)
 	if err != nil {
 		return err
 	}
 
-	// Removed db.Close() here!
 	return nil
 }
