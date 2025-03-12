@@ -5,7 +5,7 @@ go 1.23.4
 require github.com/mrz1836/go-sanitize v1.3.3
 
 require (
-	golang.org/x/crypto v0.36.0
+	github.com/mattn/go-sqlite3 v1.14.24
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	modernc.org/sqlite v1.36.0
 )
@@ -22,5 +22,6 @@ require (
 	modernc.org/libc v1.61.13 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.8.2 // indirect
-
 )
+
+require golang.org/x/crypto v0.36.0

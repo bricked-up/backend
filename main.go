@@ -27,15 +27,6 @@ func main() {
 		backend.MainHandler(db, w, r)
 	})
 
-	db, err := sql.Open("sqlite3", "bricked-up_prod.db")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Panic(err)
-	}
-
-	defer db.Close()
-	backend.MainHandler(db, w, r)
-
 	log.Printf("Listening on localhost%s", PORT)
 	if err := http.ListenAndServe(PORT, nil); err != nil {
 		log.Fatal(err)
