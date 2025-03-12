@@ -5,6 +5,7 @@ package backend
 import (
 	"fmt"
 	"net/http"
+    "database/sql"
 )
 
 // Endpoints maps URL paths to their corresponding handler functions.
@@ -46,7 +47,7 @@ func verifyHandler(w http.ResponseWriter, r *http.Request) {
 
 // MainHandler checks if the request URL matches a known endpoint.
 // If it does, the corresponding handler is called; otherwise, it returns a 404 error.
-func MainHandler(w http.ResponseWriter, r *http.Request) {
+func MainHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if handler, ok := endpoints[r.URL.Path]; ok {
 		handler(w, r)
 		return
