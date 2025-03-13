@@ -8,6 +8,7 @@ import (
 	"log"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 
 	_ "modernc.org/sqlite" // SQLite driver for database/sql
@@ -47,8 +48,13 @@ func registerUser(db *sql.DB, email, password string) error {
 		return err
 	}
 
+    passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+    if err != nil {
+        return err
+    }
+
 	// Insert user into database
-	res, err := db.Exec("INSERT INTO USER (email, password, name) VALUES (?, ?, 'New User')", email, password)
+	res, err := db.Exec("INSERT INTO USER (email, password, name) VALUES (?, ?, 'New User')", email, passwordHash)
 	if err != nil {
 		return err
 	}
@@ -56,12 +62,6 @@ func registerUser(db *sql.DB, email, password string) error {
 
 	// Generate verification code
 	code := generateVerificationCode()
-
-	// Ensure VERIFY_USER table exists
-	_, err = db.Exec("SELECT 1 FROM VERIFY_USER LIMIT 1")
-	if err != nil {
-		return err
-	}
 
 	// Insert verification record into VERIFY_USER table
 	res, err = db.Exec("INSERT INTO VERIFY_USER (code, expires) VALUES (?, ?)", code, time.Now().Add(24*time.Hour))

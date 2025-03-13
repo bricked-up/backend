@@ -12,14 +12,14 @@ INSERT INTO VERIFY_USER (code, expires) VALUES
 
 -- Populate USER table
 INSERT INTO USER (verifyid, email, password, name, avatar, verified) VALUES
-(1, 'john.doe@example.com', 'hashed_password_1', 'John Doe', 'avatar1.png', 1),
-(2, 'jane.smith@example.com', 'hashed_password_2', 'Jane Smith', 'avatar2.png', 1),
-(NULL, 'mike.johnson@example.com', 'hashed_password_3', 'Mike Johnson', 'avatar3.png', 1),
-(NULL, 'sarah.williams@example.com', 'hashed_password_4', 'Sarah Williams', 'avatar4.png', 0),
-(NULL, 'alex.brown@example.com', 'hashed_password_5', 'Alex Brown', 'avatar5.png', 0);
+(1, 'john.doe@example.com', '$2a$10$N7GjZkymUNWzmWpsLvTMpeUAEf8fZ4AzWP1KOIWY4IaxBeXfOpYmm', 'John Doe', 'avatar1.png', 1),
+(2, 'jane.smith@example.com', '$2a$10$GZTCATobqiHPNknznX8CbuiFW/4Lr91rAfW/DaFmbviXuevBLDoGu', 'Jane Smith', 'avatar2.png', 1),
+(NULL, 'mike.johnson@example.com', '$2a$10$wlsTt32wUFeEl89imMLxPeiGAnnVSbw1eVFaVC/jyviLB4nZxt4.K', 'Mike Johnson', 'avatar3.png', 1),
+(NULL, 'sarah.williams@example.com', '$2a$10$6lnVZ6Po41a8WTn9qJyfMeiNhiZkjx/A4cYIRR7dxICgl7pk8vCra', 'Sarah Williams', 'avatar4.png', 0),
+(NULL, 'alex.brown@example.com', '$2a$10$vsQ0I0vp7bINyqe77WaqcOlB2vUXgZaC4JhNr1.6sb36N8xekHuqO', 'Alex Brown', 'avatar5.png', 0);
 
 -- Populate SESSION table
-INSERT INTO SESSION (userid, timestamp) VALUES
+INSERT INTO SESSION (userid, expires) VALUES
 (1, '2025-03-10 09:30:00'),
 (2, '2025-03-10 10:15:00'),
 (3, '2025-03-10 14:22:00'),
