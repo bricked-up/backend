@@ -2,7 +2,6 @@ package backend
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "modernc.org/sqlite" // SQLite driver for database/sql
 )
@@ -107,25 +106,22 @@ func assignOrgRole(db *sql.DB, userEmail, roleName string, orgID, newRoleID int)
 	var userID int
 	err := db.QueryRow("SELECT id FROM USER WHERE email = ?", userEmail).Scan(&userID)
 	if err != nil {
-		return fmt.Errorf("failed to find user: %v", err)
+		return err
 	}
-	fmt.Printf("Found user: %d (email: %s)\n", userID, userEmail) // Debug info
 
 	// Fetch the organization details
 	var orgName string
 	err = db.QueryRow("SELECT name FROM ORGANIZATION WHERE id = ?", orgID).Scan(&orgName)
 	if err != nil {
-		return fmt.Errorf("failed to find organization: %v", err)
+		return err
 	}
-	fmt.Printf("Found organization: %d (name: %s)\n", orgID, orgName) // Debug info
 
 	// Check if the user is a member of the organization
 	var memberID int
 	err = db.QueryRow("SELECT id FROM ORG_MEMBER WHERE userid = ? AND orgid = ?", userID, orgID).Scan(&memberID)
 	if err != nil {
-		return fmt.Errorf("user is not part of the organization: %v", err)
+		return err
 	}
-	fmt.Printf("Found organization member: %d\n", memberID) // Debug info
 
 	// Fetch the current role of the user in the organization
 	var currentRoleID int
@@ -135,9 +131,8 @@ func assignOrgRole(db *sql.DB, userEmail, roleName string, orgID, newRoleID int)
 		WHERE memberid = (SELECT id FROM ORG_MEMBER WHERE userid = ? AND orgid = ?)`,
 		userID, orgID).Scan(&currentRoleID)
 	if err != nil {
-		return fmt.Errorf("failed to find current role: %v", err)
+		return err
 	}
-	fmt.Printf("Current role ID: %d\n", currentRoleID) // Debug info
 
 	// Check if the user has the necessary permissions to promote
 	var canExec bool
@@ -147,20 +142,18 @@ func assignOrgRole(db *sql.DB, userEmail, roleName string, orgID, newRoleID int)
 		WHERE id = ? AND orgid = ?`,
 		currentRoleID, orgID).Scan(&canExec)
 	if err != nil {
-		return fmt.Errorf("failed to check permissions: %v", err)
+		return err
 	}
-	fmt.Printf("User has can_exec permission: %v\n", canExec) // Debug info
 	if !canExec {
-		return fmt.Errorf("no exec permissions for promotion")
+		return err
 	}
 
 	// Check if the user is validated
 	var sessionID int
 	err = db.QueryRow("SELECT id FROM SESSION WHERE userid = ?", userID).Scan(&sessionID)
 	if err != nil {
-		return fmt.Errorf("attempted to change user role, user not validated")
+		return err
 	}
-	fmt.Printf("User session ID: %d\n", sessionID) // Debug info
 
 	// Assign the new role to the user in the organization
 	_, err = db.Exec(`
@@ -169,7 +162,7 @@ func assignOrgRole(db *sql.DB, userEmail, roleName string, orgID, newRoleID int)
 		WHERE memberid = ? AND roleid = ?`,
 		newRoleID, memberID, currentRoleID)
 	if err != nil {
-		return fmt.Errorf("failed to assign new role: %v", err)
+		return err
 	}
 
 	return nil
