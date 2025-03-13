@@ -20,6 +20,7 @@ CREATE TABLE USER (
     password TEXT NOT NULL,
     name TEXT NOT NULL,
     avatar TEXT,
+    verified BOOLEAN NOIT NULL DEFAULT 0,
     FOREIGN KEY (verifyid) REFERENCES VERIFY_USER(id) ON DELETE SET NULL
 );
 

@@ -12,11 +12,11 @@ INSERT INTO VERIFY_USER (code, expires) VALUES
 
 -- Populate USER table
 INSERT INTO USER (verifyid, email, password, name, avatar) VALUES
-(1, 'john.doe@example.com', 'hashed_password_1', 'John Doe', 'avatar1.png'),
-(2, 'jane.smith@example.com', 'hashed_password_2', 'Jane Smith', 'avatar2.png'),
-(NULL, 'mike.johnson@example.com', 'hashed_password_3', 'Mike Johnson', 'avatar3.png'),
-(NULL, 'sarah.williams@example.com', 'hashed_password_4', 'Sarah Williams', 'avatar4.png'),
-(NULL, 'alex.brown@example.com', 'hashed_password_5', 'Alex Brown', 'avatar5.png');
+(1, 'john.doe@example.com', 'hashed_password_1', 'John Doe', 'avatar1.png', 1),
+(2, 'jane.smith@example.com', 'hashed_password_2', 'Jane Smith', 'avatar2.png', 1),
+(NULL, 'mike.johnson@example.com', 'hashed_password_3', 'Mike Johnson', 'avatar3.png', 1),
+(NULL, 'sarah.williams@example.com', 'hashed_password_4', 'Sarah Williams', 'avatar4.png', 1),
+(NULL, 'alex.brown@example.com', 'hashed_password_5', 'Alex Brown', 'avatar5.png', 1);
 
 -- Populate SESSION table
 INSERT INTO SESSION (userid, timestamp) VALUES
