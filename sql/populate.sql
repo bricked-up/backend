@@ -11,7 +11,7 @@ INSERT INTO VERIFY_USER (code, expires) VALUES
 (345678, '2025-04-13');
 
 -- Populate USER table
-INSERT INTO USER (verifyid, email, password, name, avatar) VALUES
+INSERT INTO USER (verifyid, email, password, name, avatar, verified) VALUES
 (1, 'john.doe@example.com', 'hashed_password_1', 'John Doe', 'avatar1.png', 1),
 (2, 'jane.smith@example.com', 'hashed_password_2', 'Jane Smith', 'avatar2.png', 1),
 (NULL, 'mike.johnson@example.com', 'hashed_password_3', 'Mike Johnson', 'avatar3.png', 1),
@@ -184,12 +184,15 @@ INSERT INTO USER_ISSUES (userid, issueid) VALUES
 (2, 3),
 (3, 4),
 (3, 5),
-(1, 6),
-(2, 7),
-(4, 8),
+(4, 6),
+(5, 7),
+(5, 8),
 (5, 9);
+
 
 -- Populate FORGOT_PASSWORD table
 INSERT INTO FORGOT_PASSWORD (userid, code, expirationdate) VALUES
-(1, 123789, '2025-03-12'),
-(3, 456123, '2025-03-13');
+(1, 123456, '2025-03-12'),
+(2, 234567, '2025-03-13'),
+(4, 345678, '2025-03-14'),
+(5, 456789, '2025-03-15');
