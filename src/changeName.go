@@ -11,16 +11,11 @@ import (
 
 // ChangeDisplayName retrieves the user ID from the SESSION table (by sessionID)
 // and updates that user's name in the USER table without printing errors to stdout.
-func ChangeDisplayName(sessionID int, newName string) error {
-    db, err := sql.Open("sqlite3", "bricked-up_prod.db	")
-    if err != nil {
-        return err
-    }
-    defer db.Close()
-
+func ChangeDisplayName(db *sql.DB, sessionID int, newName string) error {
+    
     // Look up the userID in the SESSION table.
     var userID int
-    err = db.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
+    err := db.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
     if err != nil {
         // If no row is found, return a custom error message.
         if err == sql.ErrNoRows {
