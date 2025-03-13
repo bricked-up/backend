@@ -3,9 +3,9 @@
 package backend
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
-    "database/sql"
 )
 
 // Endpoints maps URL paths to their corresponding handler functions.
