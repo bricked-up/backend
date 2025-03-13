@@ -27,16 +27,6 @@ func TestRegisterUser(t *testing.T) {
 		t.Fatalf("Failed to execute init.sql: %v", err)
 	}
 
-	// Debugging: Check if tables exist
-	t.Log("Checking tables in database...")
-	rows, _ := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
-	for rows.Next() {
-		var name string
-		rows.Scan(&name)
-		t.Log("Found table:", name)
-	}
-	rows.Close()
-
 	// Test user registration
 	email := "test@example.com"
 	password := "securepassword"
