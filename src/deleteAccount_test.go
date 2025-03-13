@@ -2,57 +2,70 @@ package backend
 
 import (
 	"database/sql"
+	"os"
 	"testing"
 
 	_ "modernc.org/sqlite"
 )
 
-// TestDeleteUser tests the deleteUser function
-func TestDeleteUser(t *testing.T) {
-	db, err := sql.Open("sqlite", ":memory:") // Use in-memory database for testing
+// setupTestDB initializes an in-memory SQLite database for testing.
+func setupTestDB(t *testing.T) *sql.DB {
+	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("Failed to open database: %v", err)
 	}
 
-	// Create tables
-	_, err = db.Exec(`
-		CREATE TABLE users (
-			id INTEGER PRIMARY KEY,
-			email TEXT,
-			username TEXT,
-			password TEXT
-		);
-		CREATE TABLE session (
-			id TEXT PRIMARY KEY,
-			user_id INTEGER
-		);
-	`)
+	_, err = db.Exec("PRAGMA foreign_keys = ON;")
 	if err != nil {
-		t.Fatalf("Failed to create tables: %v", err)
+		t.Fatalf("Failed to enable foreign keys: %v", err)
 	}
 
-	// Insert test user and session
-	_, err = db.Exec("INSERT INTO users (id, email, username, password) VALUES (1, 'test@example.com', 'testuser', 'password123')")
+	// Execute init.sql
+	initSQL, err := os.ReadFile("../sql/init.sql")
 	if err != nil {
-		t.Fatalf("Failed to insert test user: %v", err)
+		t.Fatalf("Failed to open init.sql: %v", err)
+	}
+	if _, err := db.Exec(string(initSQL)); err != nil {
+		t.Fatalf("Failed to execute init.sql: %v", err)
 	}
 
-	_, err = db.Exec("INSERT INTO session (id, user_id) VALUES ('session123', 1)")
+	// Execute populate.sql
+	populateSQL, err := os.ReadFile("../sql/populate.sql")
 	if err != nil {
-		t.Fatalf("Failed to insert test session: %v", err)
+		t.Fatalf("Failed to open populate.sql: %v", err)
+	}
+	if _, err := db.Exec(string(populateSQL)); err != nil {
+		t.Fatalf("Failed to execute populate.sql: %v", err)
 	}
 
-	// Call deleteUser function
-	err = deleteUser(db, "session123")
-	if err != nil {
-		t.Errorf("deleteUser returned an error: %v", err)
+	return db // Do not close the DB here; let the test handle closing.
+}
+
+// TestDeleteUser verifies that a user and related records are deleted correctly.
+func TestDeleteUser(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	// Fetch a session ID for an existing user
+	var sessionID string
+	err := db.QueryRow("SELECT id FROM SESSION LIMIT 1").Scan(&sessionID)
+	if err == sql.ErrNoRows {
+		t.Fatalf("No session found in SESSION table")
+	} else if err != nil {
+		t.Fatalf("Failed to fetch session ID: %v", err)
 	}
 
-	// Verify user deletion
+	// Attempt to delete the user
+	err = deleteUser(db, sessionID)
+	if err != nil {
+		t.Fatalf("deleteUser returned an error: %v", err)
+	}
+
+	// Verify that the user is deleted
 	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE id = 1").Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM USER WHERE id = (SELECT userid FROM SESSION WHERE id = ?)", sessionID).Scan(&count)
 	if err != nil {
-		t.Errorf("Failed to check user existence: %v", err)
+		t.Fatalf("Failed to query user count: %v", err)
 	}
 
 	if count != 0 {

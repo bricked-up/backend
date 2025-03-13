@@ -2,24 +2,54 @@ package backend
 
 import (
 	"database/sql"
-
-	_ "modernc.org/sqlite" // SQLite driver
+	"fmt"
 )
 
-// DeleteUser deletes a user from the users table
-func deleteUser(db *sql.DB, sessionid string) error {
-	// Retrieve user_id from session table
-	var userID string
-	err := db.QueryRow("SELECT user_id FROM session WHERE id = ?", sessionid).Scan(&userID)
+// deleteUser removes a user and associated records based on the session ID.
+func deleteUser(db *sql.DB, sessionID string) error {
+	var userID int
+
+	// Retrieve user ID from session
+	err := db.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
 	if err != nil {
 		return err
 	}
 
-	// Delete user from users table
-	_, err = db.Exec("DELETE FROM users WHERE id = ?", userID)
+	// Debugging: Log found user ID
+	fmt.Printf("Deleting user ID: %d\n", userID)
+
+	// Delete user-related entries in foreign key tables
+	_, err = db.Exec("DELETE FROM REMINDER WHERE userid = ?", userID)
 	if err != nil {
 		return err
 	}
 
+	_, err = db.Exec("DELETE FROM USER_ISSUES WHERE userid = ?", userID)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM PROJECT_MEMBER WHERE userid = ?", userID)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM ORG_MEMBER WHERE userid = ?", userID)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM SESSION WHERE userid = ?", userID)
+	if err != nil {
+		return err
+	}
+
+	// Finally, delete the user
+	_, err = db.Exec("DELETE FROM USER WHERE id = ?", userID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("User ID %d successfully deleted\n", userID)
 	return nil
 }
