@@ -48,7 +48,7 @@ func TestSanitizeText(t *testing.T) {
 
         for _, tc := range tests {
             t.Run(tc.name, func(t *testing.T) {
-                got := sanitizeText(tc.input, TEXT)
+                got := SanitizeText(tc.input, TEXT)
                 if got != tc.expected {
                     t.Errorf("TEXT test failed: got %q, want %q", got, tc.expected)
                 }
@@ -90,7 +90,7 @@ func TestSanitizeText(t *testing.T) {
 
         for _, tc := range tests {
             t.Run(tc.name, func(t *testing.T) {
-                got := sanitizeText(tc.input, EMAIL)
+                got := SanitizeText(tc.input, EMAIL)
                 if got != tc.expected {
                     t.Errorf("EMAIL test failed: got %q, want %q", got, tc.expected)
                 }
@@ -143,7 +143,7 @@ func TestSanitizeText(t *testing.T) {
 
         for _, tc := range tests {
             t.Run(tc.name, func(t *testing.T) {
-                got := sanitizeText(tc.input, PASSWORD)
+                got := SanitizeText(tc.input, PASSWORD)
                 if got != tc.expected {
                     t.Errorf("PASSWORD test failed: got %q, want %q", got, tc.expected)
                 }
@@ -169,7 +169,7 @@ func TestSanitizeText(t *testing.T) {
 
         for _, tc := range tests {
             t.Run(tc.name, func(t *testing.T) {
-                got := sanitizeText(tc.input, tc.inputType)
+                got := SanitizeText(tc.input, tc.inputType)
                 if got != tc.expected {
                     t.Errorf("Default test failed: got %q, want %q", got, tc.expected)
                 }

@@ -40,7 +40,7 @@ func TestUpdateUserName(t *testing.T) {
     }
 
     // Call the refactored function, passing the in-memory DB and sessionID=1.
-    err = ChangeDisplayName(db, 1, "Ivan")
+    err = ChangeDisplayName(db, 1, "Ivan123!!")
     if err != nil {
         t.Errorf("ChangeDisplayName returned error: %v", err)
     }
