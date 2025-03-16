@@ -9,97 +9,32 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const testDBFile = "test_database.db"
-
-func setupTestDB() (*sql.DB, error) {
-	_ = os.Remove(testDBFile)
-	db, err := sql.Open("sqlite", testDBFile)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = db.Exec(`
-		PRAGMA foreign_keys = ON;
-
-		CREATE TABLE ORGANIZATION (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT UNIQUE NOT NULL
-		);
-
-		CREATE TABLE PROJECT (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			orgid INTEGER NOT NULL,
-			name TEXT NOT NULL
-		);
-
-		CREATE TABLE PROJECT_ROLE (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			projectid INTEGER NOT NULL,
-			name TEXT NOT NULL
-		);
-
-		CREATE TABLE PROJECT_MEMBER (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			userid INTEGER NOT NULL,
-			projectid INTEGER NOT NULL
-		);
-
-		CREATE TABLE PROJECT_MEMBER_ROLE (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			memberid INTEGER NOT NULL,
-			roleid INTEGER NOT NULL,
-			FOREIGN KEY (memberid) REFERENCES PROJECT_MEMBER(id),
-			FOREIGN KEY (roleid) REFERENCES PROJECT_ROLE(id)
-		);
-
-		CREATE TABLE VERIFY_USER (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			code INTEGER UNIQUE NOT NULL
-		);
-
-		CREATE TABLE USER (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			email TEXT UNIQUE NOT NULL,
-			verifyid INTEGER,
-			FOREIGN KEY (verifyid) REFERENCES VERIFY_USER(id)
-		);
-
-		CREATE TABLE SESSION (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			userid INTEGER NOT NULL,
-			FOREIGN KEY (userid) REFERENCES USER(id)
-		);
-	`)
-	if err != nil {
-		return nil, err
-	}
-
-	// Insert test data
-	_, err = db.Exec(`
-		INSERT INTO ORGANIZATION (name) VALUES ('Test Org');
-		INSERT INTO USER (email, verifyid) VALUES ('usera@example.com', 1);
-		INSERT INTO USER (email, verifyid) VALUES ('userb@example.com', 1);
-		INSERT INTO PROJECT (orgid, name) VALUES (1, 'Test Project');
-		INSERT INTO PROJECT_ROLE (projectid, name) VALUES (1, 'Admin');
-		INSERT INTO PROJECT_ROLE (projectid, name) VALUES (1, 'Member');
-		INSERT INTO PROJECT_MEMBER (userid, projectid) VALUES (1, 1);
-		INSERT INTO PROJECT_MEMBER (userid, projectid) VALUES (2, 1);
-		INSERT INTO PROJECT_MEMBER_ROLE (memberid, roleid) VALUES (1, 1);
-		INSERT INTO PROJECT_MEMBER_ROLE (memberid, roleid) VALUES (2, 2);
-		INSERT INTO VERIFY_USER (code) VALUES (1234);
-		INSERT INTO SESSION (userid) VALUES (1);
-	`)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
-}
-
 func TestRemoveUserRole(t *testing.T) {
-	db, err := setupTestDB()
+	db, err := sql.Open("sqlite", ":memory:") // Use in-memory database
 	assert.NoError(t, err)
 	defer db.Close()
+
+	// Load database schema
+	initSQL, err := os.ReadFile("../sql/init.sql")
+	assert.NoError(t, err)
+	_, err = db.Exec(string(initSQL))
+	assert.NoError(t, err)
+
+	// Load initial data
+	populateSQL, err := os.ReadFile("../sql/populate.sql")
+	assert.NoError(t, err)
+	_, err = db.Exec(string(populateSQL))
+	assert.NoError(t, err)
+
+	// Debugging: Check if tables exist
+	t.Log("Checking tables in database...")
+	rows, _ := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		t.Log("Found table:", name)
+	}
+	rows.Close()
 
 	// Test valid role removal
 	err = removeUserRole(db, "1", "2", 2, 1) // User A removes User B's role
