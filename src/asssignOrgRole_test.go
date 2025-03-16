@@ -2,7 +2,6 @@ package backend
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 	"testing"
 
@@ -20,19 +19,19 @@ func initializeTestDB(t *testing.T) (*sql.DB, error) {
 	// Execute init.sql to create schema
 	initSQL, err := os.ReadFile("../sql/init.sql")
 	if err != nil {
-		t.Fatalf("Failed to open init.sql: %v", err)
+		return nil, err
 	}
 	if _, err := db.Exec(string(initSQL)); err != nil {
-		t.Fatalf("Failed to execute init.sql: %v", err)
+		return nil, err
 	}
 
 	// Execute populate.sql to insert test data
 	populateSQL, err := os.ReadFile("../sql/populate.sql")
 	if err != nil {
-		t.Fatalf("Failed to open populate.sql: %v", err)
+		return nil, err
 	}
 	if _, err := db.Exec(string(populateSQL)); err != nil {
-		t.Fatalf("Failed to execute populate.sql: %v", err)
+		return nil, err
 	}
 
 	// Return the initialized database
@@ -40,30 +39,26 @@ func initializeTestDB(t *testing.T) (*sql.DB, error) {
 }
 
 // Helper function to check if the user data was correctly inserted
-func checkTestData(db *sql.DB) {
+func checkTestData(db *sql.DB) error {
 	var userCount int
 	err := db.QueryRow("SELECT COUNT(*) FROM USER").Scan(&userCount)
 	if err != nil {
-		fmt.Println("Error querying USER table:", err)
-	} else {
-		fmt.Printf("User count: %d\n", userCount)
+		return err
 	}
 
 	var orgCount int
 	err = db.QueryRow("SELECT COUNT(*) FROM ORGANIZATION").Scan(&orgCount)
 	if err != nil {
-		fmt.Println("Error querying ORGANIZATION table:", err)
-	} else {
-		fmt.Printf("Organization count: %d\n", orgCount)
+		return err
 	}
 
 	var roleCount int
 	err = db.QueryRow("SELECT COUNT(*) FROM ORG_ROLE").Scan(&roleCount)
 	if err != nil {
-		fmt.Println("Error querying ORG_ROLE table:", err)
-	} else {
-		fmt.Printf("Role count: %d\n", roleCount)
+		return err
 	}
+
+	return nil
 }
 
 // Test for the case where everything works fine
@@ -76,10 +71,20 @@ func TestAssignOrgRole_NoError(t *testing.T) {
 	defer db.Close()
 
 	// Check if data is correctly inserted
-	checkTestData(db)
+	if err := checkTestData(db); err != nil {
+		t.Fatalf("Error checking test data: %v", err)
+	}
+
+	// Fetch user ID
+	var userID int
+	err = db.QueryRow("SELECT id FROM USER WHERE email = ?", "user1@example.com").Scan(&userID)
+	if err != nil {
+		t.Fatalf("Failed to fetch user ID: %v", err)
+	}
 
 	// Call the function under test with updated arguments
-	err = assignOrgRole(db, "user1@example.com", "Admin", 1, 1)
+	// Assuming "Admin" role has an ID of 1
+	err = assignOrgRole(db, userID, 1, 1, 1)
 
 	// Assert no error occurred
 	if err != nil {
