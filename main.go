@@ -1,8 +1,12 @@
 package main
 
 import (
+<<<<<<< HEAD
 	backend "brickedup/backend/src"
 	"database/sql"
+=======
+	"brickedup/backend/src/backend"
+>>>>>>> 12cf4e5 (Fix 2.0)
 	"log"
 	"net/http"
 	"os"
