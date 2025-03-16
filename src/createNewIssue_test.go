@@ -36,7 +36,7 @@ func TestCreateNewIssue(t *testing.T) {
 	}
 
 	// Test data
-	issueid := 1001
+
 	title := "Sample Issue"
 	desc := "This is a sample issue"
 	tagid := 1      // Ensure this matches an existing ID in TAG table
@@ -46,7 +46,7 @@ func TestCreateNewIssue(t *testing.T) {
 	createdDate := time.Now()
 
 	// Call the function to test
-	insertedID, err := CreateNewIssue(issueid, desc, title, tagid, priorityid, completed, cost, createdDate, db)
+	insertedID, err := CreateNewIssue(title, desc, tagid, priorityid, completed, cost, createdDate, db)
 	if err != nil {
 		t.Fatalf("Failed to create new issue: %v", err)
 	}
