@@ -6,7 +6,7 @@ import (
 )
 
 // deleteUser removes a user and associated records based on the session ID.
-func deleteUser(db *sql.DB, sessionID string) error {
+func deleteUser(db *sql.DB, sessionID int) error {
 	var userID int
 
 	// Retrieve user ID from session

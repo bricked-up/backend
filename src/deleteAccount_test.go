@@ -14,12 +14,10 @@ func setupTestDB(t *testing.T) *sql.DB {
 	if err != nil {
 		t.Fatalf("Failed to open database: %v", err)
 	}
-
 	_, err = db.Exec("PRAGMA foreign_keys = ON;")
 	if err != nil {
 		t.Fatalf("Failed to enable foreign keys: %v", err)
 	}
-
 	// Execute init.sql
 	initSQL, err := os.ReadFile("../sql/init.sql")
 	if err != nil {
@@ -28,7 +26,6 @@ func setupTestDB(t *testing.T) *sql.DB {
 	if _, err := db.Exec(string(initSQL)); err != nil {
 		t.Fatalf("Failed to execute init.sql: %v", err)
 	}
-
 	// Execute populate.sql
 	populateSQL, err := os.ReadFile("../sql/populate.sql")
 	if err != nil {
@@ -37,7 +34,6 @@ func setupTestDB(t *testing.T) *sql.DB {
 	if _, err := db.Exec(string(populateSQL)); err != nil {
 		t.Fatalf("Failed to execute populate.sql: %v", err)
 	}
-
 	return db // Do not close the DB here; let the test handle closing.
 }
 
@@ -47,7 +43,7 @@ func TestDeleteUser(t *testing.T) {
 	defer db.Close()
 
 	// Fetch a session ID for an existing user
-	var sessionID string
+	var sessionID int
 	err := db.QueryRow("SELECT id FROM SESSION LIMIT 1").Scan(&sessionID)
 	if err == sql.ErrNoRows {
 		t.Fatalf("No session found in SESSION table")
@@ -67,7 +63,6 @@ func TestDeleteUser(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query user count: %v", err)
 	}
-
 	if count != 0 {
 		t.Errorf("User was not deleted, count: %d", count)
 	}
