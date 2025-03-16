@@ -11,7 +11,7 @@ import (
 func ValidateResetToken(token string, db *sql.DB) (string, error) {
 	var email string
 	var expiresAt time.Time
-
+	token = sanitizeText(token, TEXT)
 	// Check if the reset token is valid and has not expired
 	err := db.QueryRow("SELECT email, reset_token_expires FROM reset WHERE reset_token = ?", token).Scan(&email, &expiresAt)
 	if err == sql.ErrNoRows {
