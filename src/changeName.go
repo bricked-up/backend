@@ -1,26 +1,24 @@
 package backend
 
 import (
-    "database/sql"
-    "errors"
-    "log"
-    "strconv"
+	"brickedup/backend/src/utils"
+	"database/sql"
+	"errors"
+	"log"
+	"strconv"
 
-	_ "modernc.org/sqlite" 
+	_ "modernc.org/sqlite"
 )
 
 // ChangeDisplayName retrieves the user ID from the SESSION table (by sessionID)
 // and updates that user's name in the USER table without printing errors to stdout.
-func ChangeDisplayName(sessionID int, newName string) error {
-    db, err := sql.Open("sqlite3", "bricked-up_prod.db	")
-    if err != nil {
-        return err
-    }
-    defer db.Close()
-
+func ChangeDisplayName(db *sql.DB, sessionID int, newName string) error {
+    // Sanitize newName 
+    sanitized := utils.SanitizeText(newName, utils.TEXT)
+    
     // Look up the userID in the SESSION table.
     var userID int
-    err = db.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
+    err := db.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
     if err != nil {
         // If no row is found, return a custom error message.
         if err == sql.ErrNoRows {
@@ -32,7 +30,7 @@ func ChangeDisplayName(sessionID int, newName string) error {
 
     // Update the user’s display name in the USER table.
     query := "UPDATE USER SET name = ? WHERE id = ?"
-    result, err := db.Exec(query, newName, userID)
+    result, err := db.Exec(query, sanitized, userID)
     if err != nil {
         return err
     }
@@ -47,6 +45,6 @@ func ChangeDisplayName(sessionID int, newName string) error {
     }
 
     // Log a success message (not an error).
-    log.Printf("Successfully updated display name for user %d to '%s'\n", userID, newName)
+    log.Printf("Successfully updated display name for user %d to '%s'\n", userID, sanitized)
     return nil
 }

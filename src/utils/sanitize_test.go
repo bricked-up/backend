@@ -46,15 +46,16 @@ func TestSanitizeText(t *testing.T) {
 			},
 		}
 
-		for _, tc := range tests {
-			t.Run(tc.name, func(t *testing.T) {
-				got := SanitizeText(tc.input, TEXT)
-				if got != tc.expected {
-					t.Errorf("TEXT test failed: got %q, want %q", got, tc.expected)
-				}
-			})
-		}
-	})
+
+        for _, tc := range tests {
+            t.Run(tc.name, func(t *testing.T) {
+                got := SanitizeText(tc.input, TEXT)
+                if got != tc.expected {
+                    t.Errorf("TEXT test failed: got %q, want %q", got, tc.expected)
+                }
+            })
+        }
+    })
 
 	// --- EMAIL Subtests ---
 	t.Run("EMAIL input", func(t *testing.T) {
@@ -88,15 +89,16 @@ func TestSanitizeText(t *testing.T) {
 			},
 		}
 
-		for _, tc := range tests {
-			t.Run(tc.name, func(t *testing.T) {
-				got := SanitizeText(tc.input, EMAIL)
-				if got != tc.expected {
-					t.Errorf("EMAIL test failed: got %q, want %q", got, tc.expected)
-				}
-			})
-		}
-	})
+
+        for _, tc := range tests {
+            t.Run(tc.name, func(t *testing.T) {
+                got := SanitizeText(tc.input, EMAIL)
+                if got != tc.expected {
+                    t.Errorf("EMAIL test failed: got %q, want %q", got, tc.expected)
+                }
+            })
+        }
+    })
 
 	// --- PASSWORD Subtests ---
 	t.Run("PASSWORD input", func(t *testing.T) {
@@ -140,16 +142,15 @@ func TestSanitizeText(t *testing.T) {
 				expected: "",
 			},
 		}
-
-		for _, tc := range tests {
-			t.Run(tc.name, func(t *testing.T) {
-				got := SanitizeText(tc.input, PASSWORD)
-				if got != tc.expected {
-					t.Errorf("PASSWORD test failed: got %q, want %q", got, tc.expected)
-				}
-			})
-		}
-	})
+        for _, tc := range tests {
+            t.Run(tc.name, func(t *testing.T) {
+                got := SanitizeText(tc.input, PASSWORD)
+                if got != tc.expected {
+                    t.Errorf("PASSWORD test failed: got %q, want %q", got, tc.expected)
+                }
+            })
+        }
+    })
 
 	// --- Default case (unrecognized InputType) ---
 	t.Run("Unrecognized InputType", func(t *testing.T) {
@@ -166,14 +167,13 @@ func TestSanitizeText(t *testing.T) {
 				expected:  "SomeInput!!",
 			},
 		}
-
-		for _, tc := range tests {
-			t.Run(tc.name, func(t *testing.T) {
-				got := SanitizeText(tc.input, tc.inputType)
-				if got != tc.expected {
-					t.Errorf("Default test failed: got %q, want %q", got, tc.expected)
-				}
-			})
-		}
-	})
+        for _, tc := range tests {
+            t.Run(tc.name, func(t *testing.T) {
+                got := SanitizeText(tc.input, tc.inputType)
+                if got != tc.expected {
+                    t.Errorf("Default test failed: got %q, want %q", got, tc.expected)
+                }
+            })
+        }
+    })
 }
