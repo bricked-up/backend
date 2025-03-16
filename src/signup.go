@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"brickedup/backend/src/utils"
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
@@ -42,19 +43,21 @@ func sendVerificationEmail(to string, code string) {
 
 // RegisterUser handles user registration
 func registerUser(db *sql.DB, email, password string) error {
+	sanitizedEmail := utils.SanitizeText(email, utils.EMAIL)
+	sanitizedPassword := utils.SanitizeText(password, utils.PASSWORD)
 	// Ensure USER table exists
 	_, err := db.Exec("SELECT 1 FROM USER LIMIT 1")
 	if err != nil {
 		return err
 	}
 
-    passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-    if err != nil {
-        return err
-    }
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(sanitizedPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
 
 	// Insert user into database
-	res, err := db.Exec("INSERT INTO USER (email, password, name) VALUES (?, ?, 'New User')", email, passwordHash)
+	res, err := db.Exec("INSERT INTO USER (email, password, name) VALUES (?, ?, 'New User')", sanitizedEmail, passwordHash)
 	if err != nil {
 		return err
 	}
