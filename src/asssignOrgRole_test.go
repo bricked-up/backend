@@ -75,19 +75,58 @@ func TestAssignOrgRole_NoError(t *testing.T) {
 		t.Fatalf("Error checking test data: %v", err)
 	}
 
-	// Fetch user ID
-	var userID int
-	err = db.QueryRow("SELECT id FROM USER WHERE email = ?", "user1@example.com").Scan(&userID)
+	// Fetch user IDs for test
+	var adminUserID, targetUserID int
+	// Admin user (John Doe)
+	err = db.QueryRow("SELECT id FROM USER WHERE email = ?", "john.doe@example.com").Scan(&adminUserID)
 	if err != nil {
-		t.Fatalf("Failed to fetch user ID: %v", err)
+		t.Fatalf("Failed to fetch admin user ID: %v", err)
 	}
 
-	// Call the function under test with updated arguments
-	// Assuming "Admin" role has an ID of 1
-	err = assignOrgRole(db, userID, 1, 1, 1)
+	// Target user (Jane Smith)
+	err = db.QueryRow("SELECT id FROM USER WHERE email = ?", "jane.smith@example.com").Scan(&targetUserID)
+	if err != nil {
+		t.Fatalf("Failed to fetch target user ID: %v", err)
+	}
+
+	// Get organization ID
+	var orgID int
+	err = db.QueryRow("SELECT id FROM ORGANIZATION WHERE name = ?", "TechCorp Solutions").Scan(&orgID)
+	if err != nil {
+		t.Fatalf("Failed to fetch organization ID: %v", err)
+	}
+
+	// Get role ID (Developer role)
+	var roleID int
+	err = db.QueryRow("SELECT id FROM ORG_ROLE WHERE orgid = ? AND name = ?", orgID, "Developer").Scan(&roleID)
+	if err != nil {
+		t.Fatalf("Failed to fetch role ID: %v", err)
+	}
+
+	// Call the function under test with correct arguments
+	// assignOrgRole(db, sessionID, userID, orgID, newRoleID)
+	err = assignOrgRole(db, adminUserID, targetUserID, orgID, roleID)
 
 	// Assert no error occurred
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
+	}
+
+	// Verify the role was assigned
+	var assignedRoleID int
+	err = db.QueryRow(`
+		SELECT r.id 
+		FROM ORG_MEMBER_ROLE mr
+		JOIN ORG_MEMBER m ON mr.memberid = m.id
+		JOIN ORG_ROLE r ON mr.roleid = r.id
+		WHERE m.userid = ? AND m.orgid = ?
+	`, targetUserID, orgID).Scan(&assignedRoleID)
+
+	if err != nil {
+		t.Errorf("Failed to verify role assignment: %v", err)
+	}
+
+	if assignedRoleID != roleID {
+		t.Errorf("Expected role ID %d, got %d", roleID, assignedRoleID)
 	}
 }
