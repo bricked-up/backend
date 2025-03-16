@@ -4,7 +4,6 @@ import (
 	"brickedup/backend/src/utils"
 	"database/sql"
 	"errors"
-	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -41,7 +40,7 @@ func CreateOrganization(db *sql.DB, sessionID int, orgName string) (int, error) 
 	err = tx.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return 0, fmt.Errorf("no session found for session ID %d", sessionID)
+			return 0, errors.New("no session exists for the provided sessionID")
 		}
 		return 0, err
 	}
