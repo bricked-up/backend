@@ -9,6 +9,8 @@ import (
 
 // CreateNewIssue creates a new issue in the database with the given parameters.
 func CreateNewIssue(title string, desc string, tagid int, priorityid int, completed time.Time, cost int, date time.Time, db *sql.DB) (int64, error) {
+	title = sanitizeText(title, TEXT)
+	desc = sanitizeText(desc, TEXT)
 	issue, err := db.Exec(
 		`INSERT INTO issue (title, "desc", tagid, priorityid, created, completed, cost) 
 		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
