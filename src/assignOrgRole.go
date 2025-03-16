@@ -7,7 +7,7 @@ import (
 )
 
 // User represents a user in the system.
-type User struct {
+type user struct {
 	ID        int
 	Validated bool
 	Roles     map[int]bool
@@ -16,13 +16,13 @@ type User struct {
 // Organization represents an organization with users and executive roles.
 type Organization struct {
 	ID    int
-	Users map[int]*User
+	Users map[int]*user
 	Execs map[int]bool
 }
 
 // getUserByID retrieves a user from the database.
-func getUserByID(db *sql.DB, userID int) (*User, error) {
-	user := &User{ID: userID, Roles: make(map[int]bool)}
+func getUserByID(db *sql.DB, userID int) (*user, error) {
+	user := &user{ID: userID, Roles: make(map[int]bool)}
 
 	err := db.QueryRow("SELECT (verifyid IS NOT NULL) FROM USER WHERE id = ?", userID).Scan(&user.Validated)
 	if err != nil {
@@ -48,7 +48,7 @@ func getUserByID(db *sql.DB, userID int) (*User, error) {
 
 // getOrganizationByID retrieves an organization from the database.
 func getOrganizationByID(db *sql.DB, orgID int) (*Organization, error) {
-	org := &Organization{ID: orgID, Users: make(map[int]*User), Execs: make(map[int]bool)}
+	org := &Organization{ID: orgID, Users: make(map[int]*user), Execs: make(map[int]bool)}
 
 	err := db.QueryRow("SELECT id FROM ORGANIZATION WHERE id = ?", orgID).Scan(&org.ID)
 	if err != nil {
