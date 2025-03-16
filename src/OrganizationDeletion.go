@@ -3,7 +3,6 @@ package backend
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -27,12 +26,10 @@ func DeleteOrganization(db *sql.DB, sessionID int, orgID int) error {
 	err := db.QueryRow("SELECT userid, expires FROM SESSION WHERE id = ?", sessionID).Scan(&userID, &expires)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return fmt.Errorf("no session found for session ID %d", sessionID)
+			return errors.New("no session exists for the provided sessionID")
 		}
 		return err
 	}
-
-	// We'll skip the expiry check since the format might vary in tests
 
 	// Check if the organization exists
 	var existingOrgID int
