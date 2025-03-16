@@ -1,12 +1,8 @@
 package main
 
 import (
-<<<<<<< HEAD
 	backend "brickedup/backend/src"
 	"database/sql"
-=======
-	"brickedup/backend/src/backend"
->>>>>>> 12cf4e5 (Fix 2.0)
 	"log"
 	"net/http"
 	"os"
@@ -15,6 +11,7 @@ import (
 )
 
 const PORT = ":3100" // Server port number.
+
 // Main sets up the server and starts listening on the defined PORT.
 // It registers MainHandler to process all incoming HTTP requests.
 func main() {
