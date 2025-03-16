@@ -39,6 +39,6 @@ func TestGetTagDetails(t *testing.T) {
 	assert.Equal(t, "Tag not found", err.Error())
 
 	// Test Unix timestamp conversion for session expiry
-	expiresAt := int64(time.Now().Add(24 * time.Hour).Unix())
+	expiresAt := time.Now().Add(24 * time.Hour).Unix()
 	assert.WithinDuration(t, time.Now().Add(24*time.Hour).UTC(), time.Unix(expiresAt, 0).UTC(), time.Minute)
 }
