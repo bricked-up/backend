@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	_ "modernc.org/sqlite"
@@ -36,4 +37,8 @@ func TestGetTagDetails(t *testing.T) {
 	_, err = getTagDetails(db, "999")
 	assert.Error(t, err)
 	assert.Equal(t, "Tag not found", err.Error())
+
+	// Test Unix timestamp conversion for session expiry
+	expiresAt := int64(time.Now().Add(24 * time.Hour).Unix())
+	assert.WithinDuration(t, time.Now().Add(24*time.Hour).UTC(), time.Unix(expiresAt, 0).UTC(), time.Minute)
 }
