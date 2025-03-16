@@ -4,7 +4,6 @@ import (
 	"brickedup/backend/src/utils"
 	"database/sql"
 	"errors"
-	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -46,7 +45,7 @@ func CreateTag(db *sql.DB, sessionID int, projectID int, tagName string, tagColo
 	err = tx.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return 0, fmt.Errorf("no session found for session ID %d", sessionID)
+			return 0, errors.New("no session exists for the provided sessionID")
 		}
 		return 0, err
 	}
@@ -55,7 +54,7 @@ func CreateTag(db *sql.DB, sessionID int, projectID int, tagName string, tagColo
 	var existingProjectID int
 	err = tx.QueryRow("SELECT id FROM PROJECT WHERE id = ?", projectID).Scan(&existingProjectID)
 	if err == sql.ErrNoRows {
-		return 0, fmt.Errorf("project with ID %d not found", projectID)
+		return 0, errors.New("project does not exist")
 	} else if err != nil {
 		return 0, err
 	}
