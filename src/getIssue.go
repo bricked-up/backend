@@ -3,7 +3,6 @@ package backend
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -22,7 +21,7 @@ func getIssueDetails(db *sql.DB, issueid int) (string, error) {
 	err := row.Scan(&id, &title, &description, &tagid, &priorityid, &created, &completed, &cost)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("no issue found with ID %d", issueid)
+			return "", err
 		}
 		return "", err
 	}
