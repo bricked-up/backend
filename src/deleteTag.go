@@ -54,7 +54,7 @@ func DeleteTag(db *sql.DB, sessionID int, tagID int) error {
 
 	// If canWrite is false, the user does not have write privileges.
 	if !canWrite {
-		return fmt.Errorf("user does not have write permissions")
+		return errors.New("user does not have write privileges")
 	}
 
 	// If canWrite is true, remove the specified tag from the TAG table.
