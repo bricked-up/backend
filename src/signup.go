@@ -45,11 +45,6 @@ func sendVerificationEmail(to string, code string) {
 func registerUser(db *sql.DB, email, password string) error {
 	sanitizedEmail := utils.SanitizeText(email, utils.EMAIL)
 	sanitizedPassword := utils.SanitizeText(password, utils.PASSWORD)
-	// Ensure USER table exists
-	_, err := db.Exec("SELECT 1 FROM USER LIMIT 1")
-	if err != nil {
-		return err
-	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(sanitizedPassword), bcrypt.DefaultCost)
 	if err != nil {
