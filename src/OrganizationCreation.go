@@ -1,9 +1,10 @@
 package backend
 
 import (
+	"brickedup/backend/src/utils"
 	"database/sql"
 	"errors"
-	"strconv"
+	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -16,20 +17,38 @@ func CreateOrganization(db *sql.DB, sessionID int, orgName string) (int, error) 
 		return 0, errors.New("missing orgName")
 	}
 
+	// In the function
+	sanitizedOrgName := utils.SanitizeText(orgName, utils.TEXT)
+
+	// If sanitization removed all characters, reject the input
+	if sanitizedOrgName == "" {
+		return 0, errors.New("organization name contains only invalid characters")
+	}
+
+	// Begin transaction to ensure data consistency
+	tx, err := db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
 	// Get the user ID from the session
 	var userID int
-	var err error
-	err = db.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
+	err = tx.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionID).Scan(&userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return 0, errors.New("no session found for session ID " + strconv.Itoa(sessionID))
+			return 0, fmt.Errorf("no session found for session ID %d", sessionID)
 		}
 		return 0, err
 	}
 
 	// Check if the organization name already exists
 	var existingOrgID int
-	err = db.QueryRow("SELECT id FROM ORGANIZATION WHERE name = ?", orgName).Scan(&existingOrgID)
+	err = tx.QueryRow("SELECT id FROM ORGANIZATION WHERE name = ?", sanitizedOrgName).Scan(&existingOrgID)
 	if err == nil {
 		return 0, errors.New("organization name already exists")
 	}
@@ -38,7 +57,7 @@ func CreateOrganization(db *sql.DB, sessionID int, orgName string) (int, error) 
 	}
 
 	// Insert new organization and get its ID
-	result, err := db.Exec("INSERT INTO ORGANIZATION(name) VALUES(?)", orgName)
+	result, err := tx.Exec("INSERT INTO ORGANIZATION(name) VALUES(?)", sanitizedOrgName)
 	if err != nil {
 		return 0, err
 	}
@@ -50,15 +69,33 @@ func CreateOrganization(db *sql.DB, sessionID int, orgName string) (int, error) 
 	orgID := int(orgID64)
 
 	// Create admin role for the organization with rwx permissions
-	roleResult, err := db.Exec(`
+	roleResult, err := tx.Exec(`
 		INSERT INTO ORG_ROLE (orgid, name, can_read, can_write, can_exec)
 		VALUES (?, 'admin', 1, 1, 1)`, orgID)
 	if err != nil {
 		return 0, err
 	}
 
-	// Assign user to the organization as the admin (role_id = 1 for admin)
-	_, err = db.Exec("INSERT INTO organization_members (user_id, organization_id, role_id) VALUES (?, ?, ?)", userID, orgID, 1)
+	roleID64, err := roleResult.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	roleID := int(roleID64)
+
+	// Insert into ORG_MEMBER
+	memberResult, err := tx.Exec("INSERT INTO ORG_MEMBER (userid, orgid) VALUES (?, ?)", userID, orgID)
+	if err != nil {
+		return 0, err
+	}
+
+	memberID64, err := memberResult.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	memberID := int(memberID64)
+
+	// Assign role to member
+	_, err = tx.Exec("INSERT INTO ORG_MEMBER_ROLE (memberid, roleid) VALUES (?, ?)", memberID, roleID)
 	if err != nil {
 		return 0, err
 	}
