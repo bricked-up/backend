@@ -17,7 +17,7 @@ const PORT = ":3100" // Server port number.
 func main() {
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
-        db, err := sql.Open("sqlite3", os.Getenv("DB"))
+        db, err := sql.Open("sqlite", os.Getenv("DB"))
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             log.Panic(err)
