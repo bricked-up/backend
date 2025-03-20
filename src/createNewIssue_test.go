@@ -46,7 +46,7 @@ func TestCreateNewIssue(t *testing.T) {
 	createdDate := time.Now()
 
 	// Call the function to test
-	insertedID, err := CreateNewIssue(title, desc, tagid, priorityid, completed, cost, createdDate, db)
+	insertedID, err := CreateIssue(title, desc, tagid, priorityid, completed, cost, createdDate, db)
 	if err != nil {
 		t.Fatalf("Failed to create new issue: %v", err)
 	}

@@ -1,7 +1,7 @@
 package backend
 
 import (
-	"bricked-up/backend/src/utils"
+	"brickedup/backend/src/utils"
 	"database/sql"
 	"time"
 
