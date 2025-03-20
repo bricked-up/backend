@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"brickedup/backend/src/utils"
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 
 	_ "modernc.org/sqlite" // SQLite driver for database/sql
@@ -41,14 +43,16 @@ func sendVerificationEmail(to string, code string) {
 
 // RegisterUser handles user registration
 func registerUser(db *sql.DB, email, password string) error {
-	// Ensure USER table exists
-	_, err := db.Exec("SELECT 1 FROM USER LIMIT 1")
+	sanitizedEmail := utils.SanitizeText(email, utils.EMAIL)
+	sanitizedPassword := utils.SanitizeText(password, utils.PASSWORD)
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(sanitizedPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
 	// Insert user into database
-	res, err := db.Exec("INSERT INTO USER (email, password, name) VALUES (?, ?, 'New User')", email, password)
+	res, err := db.Exec("INSERT INTO USER (email, password, name) VALUES (?, ?, 'New User')", sanitizedEmail, passwordHash)
 	if err != nil {
 		return err
 	}
@@ -56,12 +60,6 @@ func registerUser(db *sql.DB, email, password string) error {
 
 	// Generate verification code
 	code := generateVerificationCode()
-
-	// Ensure VERIFY_USER table exists
-	_, err = db.Exec("SELECT 1 FROM VERIFY_USER LIMIT 1")
-	if err != nil {
-		return err
-	}
 
 	// Insert verification record into VERIFY_USER table
 	res, err = db.Exec("INSERT INTO VERIFY_USER (code, expires) VALUES (?, ?)", code, time.Now().Add(24*time.Hour))
