@@ -1,7 +1,7 @@
 package backend
 
 import (
-	"brickedup/backend/src/utils"
+	"brickedup/backend/utils"
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
