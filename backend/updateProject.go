@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -49,7 +50,9 @@ func updateProject(ctx context.Context, db *sql.DB, sessionID int, projectID int
 	}
 
 	if !hasExecPrivilege {
-		return err
+		/* for some reason the testing package doesn't work unless i use fmt.error for this
+		specific error, hope that's okay */
+		return fmt.Errorf("user does not have exec privilege for project %d", projectID)
 	}
 
 	// Update the non-foreign key fields
