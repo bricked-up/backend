@@ -18,4 +18,4 @@ RUN go get .
 RUN go build .
 
 # Running the server
-CMD ["./backend"]
+CMD ["./brickedup"]
