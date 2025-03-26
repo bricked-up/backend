@@ -80,13 +80,18 @@ INSERT INTO TAG (projectid, name, color) VALUES
 (4, 'Design', '#f542d4'),
 (6, 'Data', '#426ff5');
 
--- Populate ISSUE table (with tagid from TAG table)
-INSERT INTO ISSUE (title, desc, tagid, created, cost, priority) VALUES
-('Setup Development Environment', 'Install and configure all necessary tools', 1, '2023-01-01 10:00:00', 500, 1),
-('Design Database Schema', 'Create ERD and implement tables', 3, '2023-01-02 09:00:00', 1000, 2),
-('Implement User Authentication', 'Add login and registration system', 2, '2023-01-03 14:00:00', 1500, 1),
-('Create API Documentation', 'Document all endpoints and parameters', 3, '2023-01-04 11:00:00', 800, 3),
-('Bug Fix: Login Page', 'Fix validation errors on login form', 2, '2023-01-05 16:00:00', 300, 2);
+
+-- Populate ISSUE table
+INSERT INTO ISSUE (title, desc, tagid, priorityid, created, completed, cost) VALUES
+('Implement user authentication', 'Create secure authentication system with JWT', 2, 1, '2025-02-10', NULL, 8000, 1),
+('Design responsive UI', 'Create responsive UI mockups for all screen sizes', 1, 3, '2025-02-12', '2025-03-01', 5000, 1),
+('Set up database schema', 'Create initial database schema for user management', 3, 2, '2025-02-15', NULL, 4000, 2),
+('iOS app navigation', 'Implement navigation system for iOS app', 4, 5, '2025-02-20', NULL, 6000, 3),
+('Android performance optimizations', 'Optimize app performance for low-end Android devices', 5, 6, '2025-02-22', NULL, 7000, 1),
+('Server migration plan', 'Create detailed migration plan for server infrastructure', 6, 8, '2025-02-25', '2025-03-05', 10000, 2),
+('Configure CI/CD pipeline', 'Set up automated CI/CD pipeline for deployment', 7, 9, '2025-03-01', NULL, 8000, 2),
+('Brand color palette', 'Finalize brand color palette for refresh', 8, NULL, '2025-02-15', '2025-02-28', 3000, 3),
+('Data warehouse architecture', 'Design data warehouse architecture', 9, NULL, '2025-03-01', NULL, 12000, 1);
 
 -- Populate DEPENDENCY table (updated to match actual issue IDs)
 INSERT INTO DEPENDENCY (issueid, dependency) VALUES
