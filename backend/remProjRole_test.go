@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"os"
 	"testing"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
@@ -33,47 +34,18 @@ func TestRemoveUserRole(t *testing.T) {
 		t.Fatalf("Failed to execute populate.sql: %v", err)
 	}
 
-	// Insert test users and setup
-	_, err = db.Exec(`
-		INSERT INTO USER (id, verifyid, email, password, name, verified) VALUES
-		(10, 1, 'a@example.com', 'pw', 'User A', 1),
-		(20, 1, 'b@example.com', 'pw', 'User B', 1),
-		(30, 1, 'c@example.com', 'pw', 'User C', 1);
-
-		INSERT INTO ORGANIZATION (id, name) VALUES (99, 'TestOrg');
-
-		INSERT INTO PROJECT (id, orgid, name, budget, charter, archived) VALUES
-		(99, 99, 'Test Project', 1000, 'Test Charter', 0);
-
-		INSERT INTO PROJECT_ROLE (id, projectid, name, can_read, can_write, can_exec) VALUES
-		(9901, 99, 'Manager', 1, 1, 1),
-		(9902, 99, 'Developer', 1, 1, 0);
-
-		INSERT INTO PROJECT_MEMBER (id, userid, projectid) VALUES
-		(100, 10, 99),
-		(200, 20, 99),
-		(300, 30, 99);
-
-		INSERT INTO PROJECT_MEMBER_ROLE (memberid, roleid) VALUES
-		(100, 9901),
-		(200, 9902),
-		(300, 9902);
-	`)
+	// Insert session for user A (userID 1 - John, has exec permission in project 1)
+	expiry := time.Now().Add(24 * time.Hour)
+	res, err := db.Exec(`INSERT INTO SESSION (userid, expires) VALUES (?, ?)`, 1, expiry)
 	if err != nil {
-		t.Fatalf("Failed to insert test setup: %v", err)
-	}
-
-	// Insert session for user A (ID 10)
-	res, err := db.Exec(`INSERT INTO SESSION (userid, expires) VALUES (?, ?)`, 10, "2030-01-01 10:00:00")
-	if err != nil {
-		t.Fatalf("Failed to insert session for user 10: %v", err)
+		t.Fatalf("Failed to insert session for user 1: %v", err)
 	}
 	sessionID, _ := res.LastInsertId()
 
-	// Valid removal
-	err = removeUserRole(db, int(sessionID), "20", 9902, 99)
+	// SUCCESS: Remove Jane (userID 2)'s Developer role (roleid=2) in project 1
+	err = removeUserRole(db, int(sessionID), 2, 2, 1)
 	if err != nil {
-		t.Fatalf("Valid removal failed: %v", err)
+		t.Fatalf("Expected success, got error: %v", err)
 	}
 
 	// Confirm role was removed
@@ -81,7 +53,8 @@ func TestRemoveUserRole(t *testing.T) {
 	err = db.QueryRow(`
 		SELECT EXISTS(
 			SELECT 1 FROM PROJECT_MEMBER_ROLE
-			WHERE memberid = 200 AND roleid = 9902
+			WHERE memberid = (SELECT id FROM PROJECT_MEMBER WHERE userid = 2 AND projectid = 1)
+			AND roleid = 2
 		)
 	`).Scan(&exists)
 	if err != nil {
@@ -91,26 +64,32 @@ func TestRemoveUserRole(t *testing.T) {
 		t.Fatal("Role was not removed as expected")
 	}
 
-	// User B does not exist
-	err = removeUserRole(db, int(sessionID), "999", 9902, 99)
+	// ERROR: User B does not exist
+	err = removeUserRole(db, int(sessionID), 999, 2, 1)
 	if err == nil || err.Error() != "user B does not exist" {
 		t.Fatalf("Expected 'user B does not exist', got: %v", err)
 	}
 
-	// Reassign role to user B before next test
-	_, err = db.Exec(`INSERT INTO PROJECT_MEMBER_ROLE (memberid, roleid) VALUES (?, ?)`, 200, 9902)
+	// Reassign role to Jane before next test
+	_, err = db.Exec(`
+		INSERT INTO PROJECT_MEMBER_ROLE (memberid, roleid)
+		VALUES (
+			(SELECT id FROM PROJECT_MEMBER WHERE userid = 2 AND projectid = 1),
+			2
+		)
+	`)
 	if err != nil {
-		t.Fatalf("Failed to reassign role to user B: %v", err)
+		t.Fatalf("Failed to reassign role: %v", err)
 	}
 
-	// User A without exec (user C)
-	res, err = db.Exec(`INSERT INTO SESSION (userid, expires) VALUES (?, ?)`, 30, "2030-01-01 10:00:00")
+	// ERROR: User A lacks exec permissions (userID=2, Jane)
+	res, err = db.Exec(`INSERT INTO SESSION (userid, expires) VALUES (?, ?)`, 2, expiry)
 	if err != nil {
-		t.Fatalf("Failed to insert session for user 30: %v", err)
+		t.Fatalf("Failed to insert session for user 2: %v", err)
 	}
-	noExecID, _ := res.LastInsertId()
+	noExecSessionID, _ := res.LastInsertId()
 
-	err = removeUserRole(db, int(noExecID), "20", 9902, 99)
+	err = removeUserRole(db, int(noExecSessionID), 1, 1, 1)
 	if err == nil || err.Error() != "user A lacks exec permissions" {
 		t.Fatalf("Expected 'user A lacks exec permissions', got: %v", err)
 	}

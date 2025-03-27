@@ -7,7 +7,7 @@ import (
 
 // removeUserRole removes the role of user B in a project.
 // sessionID is used to authenticate user A (the initiator).
-func removeUserRole(db *sql.DB, sessionID int, userBID string, roleID, projectID int) error {
+func removeUserRole(db *sql.DB, sessionID int, userBID int, roleID, projectID int) error {
 	var userAID int
 	var isUserAValidated, isUserBValidated bool
 	var userBExists, userBInProject, userBHasRole, userAHasExec bool
