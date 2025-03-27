@@ -39,7 +39,7 @@ func TestCreateNewIssue(t *testing.T) {
 
 	title := "Sample Issue"
 	desc := "This is a sample issue"
-	tagid := 1      // Ensure this matches an existing ID in TAG table
+	tagid := 1    // Ensure this matches an existing ID in TAG table
 	priority := 1 // Ensure this matches an existing ID in PRIORITY table
 	completed := time.Now().Add(24 * time.Hour)
 	cost := 500
