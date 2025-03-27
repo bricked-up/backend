@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"context"
 	"database/sql"
 	"os"
 	"testing"
@@ -37,8 +36,8 @@ func setupTeste(t *testing.T) *sql.DB {
 func TestUpdateProject(t *testing.T) {
 	db := setupTeste(t)
 	defer db.Close()
-	ctx := context.Background()
 
+	// Rest of the test remains the same as the previous version, just removed the `ctx` variable and reference
 	// Get a valid project ID
 	var projectID int
 	err := db.QueryRow("SELECT id FROM PROJECT LIMIT 1").Scan(&projectID)
@@ -90,7 +89,7 @@ func TestUpdateProject(t *testing.T) {
 	}
 
 	// Test successful update
-	err = updateProject(ctx, db, sessionID, projectID, updatedProject)
+	err = updateProject(db, sessionID, projectID, updatedProject)
 	if err != nil {
 		t.Errorf("Expected project update to succeed, got error: %v", err)
 	}
@@ -119,14 +118,14 @@ func TestUpdateProject(t *testing.T) {
 
 	// Test with non-existent project ID
 	nonExistentProjectID := 99999
-	err = updateProject(ctx, db, sessionID, nonExistentProjectID, updatedProject)
+	err = updateProject(db, sessionID, nonExistentProjectID, updatedProject)
 	if err == nil {
 		t.Errorf("Expected error for non-existent project ID, but got nil")
 	}
 
 	// Test with invalid session ID
 	invalidSessionID := 99999
-	err = updateProject(ctx, db, invalidSessionID, projectID, updatedProject)
+	err = updateProject(db, invalidSessionID, projectID, updatedProject)
 	if err == nil {
 		t.Errorf("Expected error for invalid session ID, but got nil")
 	}
@@ -144,7 +143,7 @@ func TestUpdateProject(t *testing.T) {
 	}
 	expiredSessionID := int(expiredID)
 
-	err = updateProject(ctx, db, expiredSessionID, projectID, updatedProject)
+	err = updateProject(db, expiredSessionID, projectID, updatedProject)
 	if err == nil {
 		t.Errorf("Expected error for expired session, but got nil")
 	}
@@ -224,7 +223,7 @@ func TestUpdateProject(t *testing.T) {
 	}
 
 	// Try to update with a user who doesn't have exec privileges
-	err = updateProject(ctx, db, int(nonExecSessionID), projectID, updatedProject)
+	err = updateProject(db, int(nonExecSessionID), projectID, updatedProject)
 	if err == nil {
 		t.Errorf("Expected error for user without exec privileges, but got nil")
 	}
