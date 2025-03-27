@@ -7,6 +7,7 @@ COPY . /backend
 
 # Setting up environment
 ENV DB "/backend/bricked-up_prod.db"
+ENV LOGS "/backend/backend.log"
 EXPOSE 3100
 
 # Setting up database
