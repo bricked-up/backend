@@ -92,48 +92,48 @@ func VerifyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	
 
-	verifyIDStr := r.URL.Query().Get("id")
-	code := r.URL.Query().Get("code")
+	// verifyIDStr := r.URL.Query().Get("id")
+	// code := r.URL.Query().Get("code")
 
-	if verifyIDStr == "" || code == "" {
-		http.Error(w, "Missing id or code", http.StatusBadRequest)
-		return
-	}
+	// if verifyIDStr == "" || code == "" {
+	// 	http.Error(w, "Missing id or code", http.StatusBadRequest)
+	// 	return
+	// }
 
-	verifyID, err := strconv.Atoi(verifyIDStr)
-	if err != nil {
-		http.Error(w, "Invalid verification ID", http.StatusBadRequest)
-		return
-	}
+	// verifyID, err := strconv.Atoi(verifyIDStr)
+	// if err != nil {
+	// 	http.Error(w, "Invalid verification ID", http.StatusBadRequest)
+	// 	return
+	// }
 
-	// Check if the verify code exists and matches
-	var userID int
-	err = db.QueryRow(`SELECT userid FROM VERIFY WHERE id = ? AND code = ?`, verifyID, code).Scan(&userID)
-	if err == sql.ErrNoRows {
-		http.Error(w, "Invalid verification code or ID", http.StatusUnauthorized)
-		return
-	} else if err != nil {
-		http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// // Check if the verify code exists and matches
+	// var userID int
+	// err = db.QueryRow(`SELECT userid FROM VERIFY WHERE id = ? AND code = ?`, verifyID, code).Scan(&userID)
+	// if err == sql.ErrNoRows {
+	// 	http.Error(w, "Invalid verification code or ID", http.StatusUnauthorized)
+	// 	return
+	// } else if err != nil {
+	// 	http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 
-	// Update user record to set verifyid
-	_, err = db.Exec(`UPDATE USER SET verifyid = ? WHERE id = ?`, verifyID, userID)
-	if err != nil {
-		http.Error(w, "Failed to update user verification: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// // Update user record to set verifyid
+	// _, err = db.Exec(`UPDATE USER SET verifyid = ? WHERE id = ?`, verifyID, userID)
+	// if err != nil {
+	// 	http.Error(w, "Failed to update user verification: "+err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 
-	// Delete the verification entry
-	_, err = db.Exec(`DELETE FROM VERIFY WHERE id = ?`, verifyID)
-	if err != nil {
-		http.Error(w, "Failed to clean up verification record: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// // Delete the verification entry
+	// _, err = db.Exec(`DELETE FROM VERIFY WHERE id = ?`, verifyID)
+	// if err != nil {
+	// 	http.Error(w, "Failed to clean up verification record: "+err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 
-	// Respond with success
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "User verified successfully!")
+	// // Respond with success
+	// w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "TODO: verify")
 }
 
 // ChangeNameHandler updates the display name for the logged-in user.
@@ -200,7 +200,7 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	priorityID, err := strconv.Atoi(r.FormValue("priorityid"))
+	priority, err := strconv.Atoi(r.FormValue("priority"))
 	if err != nil {
 		http.Error(w, "Invalid priority ID", http.StatusBadRequest)
 		return
@@ -216,20 +216,22 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	dateStr := r.FormValue("date")
 	completedStr := r.FormValue("completed")
 
-	date, err := time.Parse("2006-01-02", dateStr)
+	const layout = "2006-01-02 15:04:05"
+
+	date, err := time.Parse(layout, dateStr)
 	if err != nil {
-		http.Error(w, "Invalid date format (use YYYY-MM-DD)", http.StatusBadRequest)
+		http.Error(w, "Invalid date format (use YYYY-MM-DD HH:MM:SS)", http.StatusBadRequest)
 		return
 	}
 
-	completed, err := time.Parse("2006-01-02", completedStr)
+	completed, err := time.Parse(layout, completedStr)
 	if err != nil {
-		http.Error(w, "Invalid completed date format (use YYYY-MM-DD)", http.StatusBadRequest)
+		http.Error(w, "Invalid completed date format (use YYYY-MM-DD HH:MM:SS)", http.StatusBadRequest)
 		return
 	}
 
 	// Call your backend logic
-	issueID, err := CreateIssue(title, desc, tagID, priorityID, completed, cost, date, db)
+	issueID, err := CreateIssue(title, desc, tagID, priority, completed, cost, date, db)
 	if err != nil {
 		http.Error(w, "Failed to create issue: "+err.Error(), http.StatusInternalServerError)
 		log.Println(err)
