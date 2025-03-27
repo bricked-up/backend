@@ -14,9 +14,27 @@ const PORT = ":3100" // Server port number.
 // Main sets up the server and starts listening on the defined PORT.
 // It registers MainHandler to process all incoming HTTP requests.
 func main() {
+<<<<<<< HEAD
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
 
+=======
+
+    // Persistent log file
+    logFilePath := os.Getenv("LOGS")
+    if (logFilePath != "") {
+        logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+        if err != nil {
+            log.Panic(err)
+        }
+
+        defer logFile.Close();
+
+        log.SetOutput(logFile)
+    }
+
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+>>>>>>> d8ed6d8 (feat(logs, closes #125): added option for logs to be redirecte to a file (#126))
 
         db, err := sql.Open("sqlite", os.Getenv("DB"))
         if err != nil {
