@@ -39,22 +39,14 @@ func TestCreateNewIssue(t *testing.T) {
 
 	title := "Sample Issue"
 	desc := "This is a sample issue"
-	tagid := 1      // Ensure this matches an existing ID in TAG table
-<<<<<<< HEAD
+	tagid := 1    // Ensure this matches an existing ID in TAG table
 	priority := 1 // Ensure this matches an existing ID in PRIORITY table
-=======
-	priorityid := 1 // Ensure this matches an existing ID in PRIORITY table
->>>>>>> 462d0b2 (bood)
 	completed := time.Now().Add(24 * time.Hour)
 	cost := 500
 	createdDate := time.Now()
 
 	// Call the function to test
-<<<<<<< HEAD
 	insertedID, err := CreateIssue(title, desc, tagid, priority, completed, cost, createdDate, db)
-=======
-	insertedID, err := CreateIssue(title, desc, tagid, priorityid, completed, cost, createdDate, db)
->>>>>>> 462d0b2 (bood)
 	if err != nil {
 		t.Fatalf("Failed to create new issue: %v", err)
 	}
