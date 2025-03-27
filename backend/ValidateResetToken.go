@@ -44,6 +44,5 @@ func ValidateResetToken(token string, newpassword string, db *sql.DB) (string, e
 	if err != nil {
 		return "", err
 	}
-
 	return email, nil
 }

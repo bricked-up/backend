@@ -19,9 +19,9 @@ func VerifyUser(verificationCode int, db *sql.DB) error {
 	// Check if the verification code exists and is valid
 	var userID int
 	err = db.QueryRow(`
-        SELECT u.id FROM USER u 
-        INNER JOIN VERIFY_USER vu ON u.verifyid = vu.id 
-        WHERE vu.code = ? AND vu.expires >= ?`, verificationCode, time.Now()).Scan(&userID)
+		SELECT u.id FROM USER u 
+		INNER JOIN VERIFY_USER vu ON u.verifyid = vu.id 
+		WHERE vu.code = ? AND vu.expires >= ?`, verificationCode, time.Now()).Scan(&userID)
 
 	if err != nil {
 		return err
