@@ -80,30 +80,18 @@ INSERT INTO TAG (projectid, name, color) VALUES
 (4, 'Design', '#f542d4'),
 (6, 'Data', '#426ff5');
 
--- Populate PRIORITY table
-INSERT INTO PRIORITY (projectid, name, priority) VALUES
-(1, 'Critical', 1),
-(1, 'High', 2),
-(1, 'Medium', 3),
-(1, 'Low', 4),
-(2, 'Critical', 1),
-(2, 'High', 2),
-(2, 'Medium', 3),
-(3, 'Urgent', 1),
-(3, 'Important', 2),
-(3, 'Normal', 3);
 
 -- Populate ISSUE table
 INSERT INTO ISSUE (title, desc, tagid, priorityid, created, completed, cost) VALUES
-('Implement user authentication', 'Create secure authentication system with JWT', 2, 1, '2025-02-10', NULL, 8000),
-('Design responsive UI', 'Create responsive UI mockups for all screen sizes', 1, 3, '2025-02-12', '2025-03-01', 5000),
-('Set up database schema', 'Create initial database schema for user management', 3, 2, '2025-02-15', NULL, 4000),
-('iOS app navigation', 'Implement navigation system for iOS app', 4, 5, '2025-02-20', NULL, 6000),
-('Android performance optimizations', 'Optimize app performance for low-end Android devices', 5, 6, '2025-02-22', NULL, 7000),
-('Server migration plan', 'Create detailed migration plan for server infrastructure', 6, 8, '2025-02-25', '2025-03-05', 10000),
-('Configure CI/CD pipeline', 'Set up automated CI/CD pipeline for deployment', 7, 9, '2025-03-01', NULL, 8000),
-('Brand color palette', 'Finalize brand color palette for refresh', 8, NULL, '2025-02-15', '2025-02-28', 3000),
-('Data warehouse architecture', 'Design data warehouse architecture', 9, NULL, '2025-03-01', NULL, 12000);
+('Implement user authentication', 'Create secure authentication system with JWT', 2, 1, '2025-02-10', NULL, 8000, 1),
+('Design responsive UI', 'Create responsive UI mockups for all screen sizes', 1, 3, '2025-02-12', '2025-03-01', 5000, 1),
+('Set up database schema', 'Create initial database schema for user management', 3, 2, '2025-02-15', NULL, 4000, 2),
+('iOS app navigation', 'Implement navigation system for iOS app', 4, 5, '2025-02-20', NULL, 6000, 3),
+('Android performance optimizations', 'Optimize app performance for low-end Android devices', 5, 6, '2025-02-22', NULL, 7000, 1),
+('Server migration plan', 'Create detailed migration plan for server infrastructure', 6, 8, '2025-02-25', '2025-03-05', 10000, 2),
+('Configure CI/CD pipeline', 'Set up automated CI/CD pipeline for deployment', 7, 9, '2025-03-01', NULL, 8000, 2),
+('Brand color palette', 'Finalize brand color palette for refresh', 8, NULL, '2025-02-15', '2025-02-28', 3000, 3),
+('Data warehouse architecture', 'Design data warehouse architecture', 9, NULL, '2025-03-01', NULL, 12000, 1);
 
 -- Populate DEPENDENCY table
 INSERT INTO DEPENDENCY (issueid, dependency) VALUES
