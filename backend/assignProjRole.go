@@ -7,7 +7,7 @@ import (
 
 // assignProjectRole promotes a validated user (userB) to a new role within a project,
 // if the acting user (userA, identified via sessionid) has exec permission within that project.
-func assignProjectRole(db *sql.DB, sessionid int, userB string, roleid, projectid int) error {
+func assignProjectRole(db *sql.DB, sessionid int, userBID int, roleid, projectid int) error {
 	// Validate session
 	var userA int
 	var sessionValid bool
@@ -28,7 +28,7 @@ func assignProjectRole(db *sql.DB, sessionid int, userB string, roleid, projecti
 
 	// Check userB is verified
 	var verified bool
-	err = db.QueryRow(`SELECT verified FROM USER WHERE id = ?`, userB).Scan(&verified)
+	err = db.QueryRow(`SELECT verified FROM USER WHERE id = ?`, userBID).Scan(&verified)
 	if err != nil || !verified {
 		return errors.New("userB is not verified")
 	}
@@ -37,7 +37,7 @@ func assignProjectRole(db *sql.DB, sessionid int, userB string, roleid, projecti
 	var userBMemberID int
 	err = db.QueryRow(`
 		SELECT id FROM PROJECT_MEMBER WHERE userid = ? AND projectid = ?
-	`, userB, projectid).Scan(&userBMemberID)
+	`, userBID, projectid).Scan(&userBMemberID)
 	if err != nil {
 		return errors.New("userB is not part of the project")
 	}
