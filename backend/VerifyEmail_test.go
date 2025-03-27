@@ -2,36 +2,10 @@ package backend
 
 import (
 	"database/sql"
-	"os"
 	"testing"
 
 	_ "modernc.org/sqlite"
 )
-
-func setupTestDb(t *testing.T) *sql.DB {
-	db, err := sql.Open("sqlite", ":memory:")
-	if err != nil {
-		t.Fatalf("failed to open in-memory db: %v", err)
-	}
-
-	initSQL, err := os.ReadFile("../sql/init.sql")
-	if err != nil {
-		t.Fatalf("failed to read init.sql: %v", err)
-	}
-	if _, err := db.Exec(string(initSQL)); err != nil {
-		t.Fatalf("failed to exec init.sql: %v", err)
-	}
-
-	populateSQL, err := os.ReadFile("../sql/populate.sql")
-	if err != nil {
-		t.Fatalf("failed to read populate.sql: %v", err)
-	}
-	if _, err := db.Exec(string(populateSQL)); err != nil {
-		t.Fatalf("failed to exec populate.sql: %v", err)
-	}
-
-	return db
-}
 
 func TestVerifyUser_FromPopulateSQL(t *testing.T) {
 	tests := []struct {
