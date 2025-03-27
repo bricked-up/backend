@@ -26,3 +26,5 @@ require (
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.8.2 // indirect
 )
+
+require golang.org/x/crypto v0.36.0

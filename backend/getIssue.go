@@ -32,7 +32,7 @@ func getIssueDetails(db *sql.DB, issueid int) (string, error) {
 		"title":       title,
 		"description": description,
 		"tagid":       tagid,
-		"priority":  priority,
+		"priority":    priority,
 		"created":     created.Time,
 		"completed":   completed.Time,
 		"cost":        cost,
