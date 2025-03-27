@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -24,8 +25,8 @@ func generateVerificationCode() string {
 
 // SendVerificationEmail sends an email using gomail with a verification code
 func sendVerificationEmail(to string, code string) {
-	email := "backend@gmail.com"
-	password := "123"
+	email := os.Getenv("EMAIL")
+    password := os.Getenv("PASS")
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", email)
