@@ -80,45 +80,26 @@ INSERT INTO TAG (projectid, name, color) VALUES
 (4, 'Design', '#f542d4'),
 (6, 'Data', '#426ff5');
 
--- Populate PRIORITY table
-INSERT INTO PRIORITY (projectid, name, priority) VALUES
-(1, 'Critical', 1),
-(1, 'High', 2),
-(1, 'Medium', 3),
-(1, 'Low', 4),
-(2, 'Critical', 1),
-(2, 'High', 2),
-(2, 'Medium', 3),
-(3, 'Urgent', 1),
-(3, 'Important', 2),
-(3, 'Normal', 3);
+-- Populate ISSUE table (with tagid from TAG table)
+INSERT INTO ISSUE (title, desc, tagid, created, cost, priority) VALUES
+('Setup Development Environment', 'Install and configure all necessary tools', 1, '2023-01-01 10:00:00', 500, 1),
+('Design Database Schema', 'Create ERD and implement tables', 3, '2023-01-02 09:00:00', 1000, 2),
+('Implement User Authentication', 'Add login and registration system', 2, '2023-01-03 14:00:00', 1500, 1),
+('Create API Documentation', 'Document all endpoints and parameters', 3, '2023-01-04 11:00:00', 800, 3),
+('Bug Fix: Login Page', 'Fix validation errors on login form', 2, '2023-01-05 16:00:00', 300, 2);
 
--- Populate ISSUE table
-INSERT INTO ISSUE (title, desc, tagid, priorityid, created, completed, cost) VALUES
-('Implement user authentication', 'Create secure authentication system with JWT', 2, 1, '2025-02-10', NULL, 8000),
-('Design responsive UI', 'Create responsive UI mockups for all screen sizes', 1, 3, '2025-02-12', '2025-03-01', 5000),
-('Set up database schema', 'Create initial database schema for user management', 3, 2, '2025-02-15', NULL, 4000),
-('iOS app navigation', 'Implement navigation system for iOS app', 4, 5, '2025-02-20', NULL, 6000),
-('Android performance optimizations', 'Optimize app performance for low-end Android devices', 5, 6, '2025-02-22', NULL, 7000),
-('Server migration plan', 'Create detailed migration plan for server infrastructure', 6, 8, '2025-02-25', '2025-03-05', 10000),
-('Configure CI/CD pipeline', 'Set up automated CI/CD pipeline for deployment', 7, 9, '2025-03-01', NULL, 8000),
-('Brand color palette', 'Finalize brand color palette for refresh', 8, NULL, '2025-02-15', '2025-02-28', 3000),
-('Data warehouse architecture', 'Design data warehouse architecture', 9, NULL, '2025-03-01', NULL, 12000);
-
--- Populate DEPENDENCY table
+-- Populate DEPENDENCY table (updated to match actual issue IDs)
 INSERT INTO DEPENDENCY (issueid, dependency) VALUES
 (3, 1),
 (4, 2),
-(5, 2),
-(7, 6);
+(5, 2);
 
--- Populate REMINDER table
-INSERT INTO REMINDER (id, issueid, userid) VALUES
-(1, 1, 1),
-(2, 3, 2),
-(3, 6, 3),
-(4, 8, 4),
-(5, 9, 5);
+-- Populate REMINDER table (updated to match actual issue and user IDs)
+INSERT INTO REMINDER (issueid, userid) VALUES
+(1, 1),
+(3, 2);
+
+-- Rest of the script remains the same as in the original populate script...
 
 -- Populate ORG_MEMBER_ROLE table
 INSERT INTO ORG_MEMBER_ROLE (memberid, roleid) VALUES
@@ -170,12 +151,8 @@ INSERT INTO PROJECT_ISSUES (projectid, issueid) VALUES
 (1, 1),
 (1, 2),
 (1, 3),
-(2, 4),
-(2, 5),
-(3, 6),
-(3, 7),
-(4, 8),
-(6, 9);
+(1, 4),
+(1, 5);
 
 -- Populate USER_ISSUES table
 INSERT INTO USER_ISSUES (userid, issueid) VALUES
@@ -183,12 +160,7 @@ INSERT INTO USER_ISSUES (userid, issueid) VALUES
 (2, 2),
 (2, 3),
 (3, 4),
-(3, 5),
-(4, 6),
-(5, 7),
-(5, 8),
-(5, 9);
-
+(3, 5);
 
 -- Populate FORGOT_PASSWORD table
 INSERT INTO FORGOT_PASSWORD (userid, code, expirationdate) VALUES
