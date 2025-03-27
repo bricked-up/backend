@@ -36,7 +36,7 @@ func sendVerificationEmail(to string, code string) {
 
 	/* email is sent to user without implementation, but I did not
 	know how to implement sending the email without smtp or server access */
-	d := gomail.NewDialer("smtp.example.com", 587, email, password)
+	d := gomail.NewDialer("smtp.gmail.com", 587, email, password)
 	if err := d.DialAndSend(m); err != nil {
 		log.Println("Failed to send email:", err)
 	}
