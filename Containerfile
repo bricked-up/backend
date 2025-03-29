@@ -7,6 +7,7 @@ COPY . /backend
 
 # Setting up environment
 ENV DB "/backend/bricked-up_prod.db"
+ENV LOGS "/backend/backend.log"
 EXPOSE 3100
 
 # Setting up database
@@ -18,4 +19,4 @@ RUN go get .
 RUN go build .
 
 # Running the server
-CMD ["./backend"]
+CMD ["./brickedup"]
