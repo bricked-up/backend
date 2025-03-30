@@ -33,54 +33,60 @@ var endpoints = map[string]DBHandlerFunc{
 
 // LoginHandler handles requests to the /login endpoint.
 // It only allows GET requests and responds with a placeholder message.
+
+
 func LoginHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+
 		http.Error(w, "Method unsupported", http.StatusMethodNotAllowed)
 		return
 	}
 
-    r.ParseForm();
-    email := r.FormValue("email")
-    password := r.FormValue("password")
+	r.ParseForm()
+	email := r.FormValue("email")
+	password := r.FormValue("password")
 
-    sessionid, err := login(db, email, password)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        log.Println(err.Error())
-        return
-    }
+	sessionid, err := login(db, email, password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
 
-    session := fmt.Sprint(sessionid)
+	session := fmt.Sprint(sessionid)
 
-    cookie := &http.Cookie{
-		Name:    "bricked-up_login",
-		Value:   session,
-		Expires: time.Now().Add(12 * 30 * 24 * time.Hour),
-		Secure:  true,
+	cookie := &http.Cookie{
+		Name:     "bricked-up_login",
+		Value:    session,
+		Expires:  time.Now().Add(12 * 30 * 24 * time.Hour),
+		Secure:   true,
 		HttpOnly: true,
 	}
 
 	http.SetCookie(w, cookie)
+
 }
 
 // SignupHandler handles requests to the /signup endpoint.
 // It restricts the request method to GET and responds with a placeholder message.
+
 func SignupHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method unsupported", http.StatusMethodNotAllowed)
 		return
 	}
 
-    r.ParseForm();
-    email := r.FormValue("email")
-    password := r.FormValue("password")
+	r.ParseForm()
+	email := r.FormValue("email")
+	password := r.FormValue("password")
 
-    err := registerUser(db, email, password)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        log.Println(err.Error())
-        return
-    }
+	err := registerUser(db, email, password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
 }
 
 // VerifyHandler handles requests to the /verify endpoint.

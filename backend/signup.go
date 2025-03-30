@@ -26,7 +26,7 @@ func generateVerificationCode() string {
 // SendVerificationEmail sends an email using gomail with a verification code
 func sendVerificationEmail(to string, code string) {
 	email := os.Getenv("EMAIL")
-    password := os.Getenv("PASS")
+	password := os.Getenv("PASS")
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", email)
