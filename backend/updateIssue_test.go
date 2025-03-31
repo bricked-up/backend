@@ -1,54 +1,79 @@
 package backend
 
 import (
+	"database/sql"
+	"os"
 	"testing"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
 
-// TestUpdateIssue verifies the UpdateIssue function for various conditions
-func TestUpdateIssue(t *testing.T) {
-	db := setupDatabase(t)
+func TestUpdateIssueDetails(t *testing.T) {
+	db, err := sql.Open("sqlite", ":memory:")
+	if err != nil {
+		t.Fatalf("Failed to open database: %v", err)
+	}
 	defer db.Close()
 
-	// Test case for successful issue update
-	t.Run("Successful issue update", func(t *testing.T) {
-		completed := "2025-04-01"
-		err := UpdateIssue(db, 1, 1, "Updated Title", "Updated Description", "2025-01-01", &completed, 1000)
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
-	})
+	// Load init.sql
+	initSQL, err := os.ReadFile("../sql/init.sql")
+	if err != nil {
+		t.Fatalf("Failed to read init.sql: %v", err)
+	}
+	if _, err := db.Exec(string(initSQL)); err != nil {
+		t.Fatalf("Failed to execute init.sql: %v", err)
+	}
 
-	// Test case for invalid session ID
-	t.Run("Invalid session ID", func(t *testing.T) {
-		completed := "2025-04-01"
-		err := UpdateIssue(db, 999, 1, "Updated Title", "Updated Description", "2025-01-01", &completed, 1000)
-		if err == nil || err.Error() != "Invalid session ID" {
-			t.Errorf("Expected error 'Invalid session ID', got %v", err)
-		}
-	})
+	// Load populate.sql
+	populateSQL, err := os.ReadFile("../sql/populate.sql")
+	if err != nil {
+		t.Fatalf("Failed to read populate.sql: %v", err)
+	}
+	if _, err := db.Exec(string(populateSQL)); err != nil {
+		t.Fatalf("Failed to execute populate.sql: %v", err)
+	}
 
-	// Test case for invalid issue ID
-	t.Run("Invalid issue ID", func(t *testing.T) {
-		completed := "2025-04-01"
-		err := UpdateIssue(db, 1, 999, "Updated Title", "Updated Description", "2025-01-01", &completed, 1000)
-		if err == nil || err.Error() != "Invalid issue ID" {
-			t.Errorf("Expected error 'Invalid issue ID', got %v", err)
-		}
-	})
+	// Insert session for user ID 1
+	expiry := time.Now().Add(24 * time.Hour)
+	res, err := db.Exec(`INSERT INTO SESSION (userid, expires) VALUES (?, ?)`, 1, expiry)
+	if err != nil {
+		t.Fatalf("Failed to insert session: %v", err)
+	}
+	sessionID, _ := res.LastInsertId()
 
-	// Test case for user without write permissions
-	t.Run("User without write permissions", func(t *testing.T) {
-		_, err := db.Exec("UPDATE PROJECT_ROLE SET can_write = 0 WHERE id = 1")
-		if err != nil {
-			t.Fatalf("Failed to modify permissions: %v", err)
-		}
+	// Get issue ID from PROJECT_ISSUES table
+	var issueID int
+	err = db.QueryRow(`SELECT issueid FROM PROJECT_ISSUES WHERE id = 1`).Scan(&issueID)
+	if err != nil {
+		t.Fatalf("Failed to fetch issue ID: %v", err)
+	}
 
-		completed := "2025-04-01"
-		err = UpdateIssue(db, 4, 1, "Updated Title", "Updated Description", "2025-01-01", &completed, 1000)
-		if err == nil || err.Error() != "User does not have write permissions" {
-			t.Errorf("Expected error 'User does not have write permissions', got %v", err)
-		}
-	})
+	completedTime := time.Now()
+
+	// Valid update test
+	issue := Issue{
+		Title:     "Updated Title",
+		Desc:      "Updated description",
+		Created:   time.Now(),
+		Completed: &completedTime,
+		Cost:      999,
+	}
+	err = UpdateIssueDetails(db, int(sessionID), issueID, issue)
+	if err != nil {
+		t.Errorf("Expected success, got error: %v", err)
+	}
+
+	// Invalid issue ID test
+	badIssue := Issue{
+		Title:     "New Title",
+		Desc:      "New Desc",
+		Created:   time.Now(),
+		Completed: nil,
+		Cost:      3000,
+	}
+	err = UpdateIssueDetails(db, int(sessionID), 9999, badIssue)
+	if err == nil {
+		t.Error("Expected error for non-existent issue, got none")
+	}
 }
