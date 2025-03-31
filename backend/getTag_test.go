@@ -2,10 +2,10 @@ package backend
 
 import (
 	"database/sql"
+	"encoding/json"
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	_ "modernc.org/sqlite"
 )
 
@@ -16,7 +16,7 @@ func TestGetTagDetails(t *testing.T) {
 	}
 	defer db.Close()
 
-	// Load database schema
+	// Load schema
 	initSQL, err := os.ReadFile("../sql/init.sql")
 	if err != nil {
 		t.Fatalf("Failed to read init.sql: %v", err)
@@ -25,7 +25,7 @@ func TestGetTagDetails(t *testing.T) {
 		t.Fatalf("Failed to execute init.sql: %v", err)
 	}
 
-	// Load initial data
+	// Load data
 	populateSQL, err := os.ReadFile("../sql/populate.sql")
 	if err != nil {
 		t.Fatalf("Failed to read populate.sql: %v", err)
@@ -34,13 +34,30 @@ func TestGetTagDetails(t *testing.T) {
 		t.Fatalf("Failed to execute populate.sql: %v", err)
 	}
 
-	// Test valid tag retrieval
+	// Test: Valid tag
 	jsonData, err := getTagDetails(db, "1")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, jsonData)
+	if err != nil {
+		t.Errorf("Expected valid tag, got error: %v", err)
+	}
 
-	// Test non-existent tag retrieval
+	var tag Tag
+	err = json.Unmarshal(jsonData, &tag)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+	if tag.ID != 1 {
+		t.Errorf("Expected tag ID 1, got %d", tag.ID)
+	}
+
+	// Test: Invalid tag ID format
+	_, err = getTagDetails(db, "abc")
+	if err == nil || err.Error() != "invalid tag ID" {
+		t.Errorf("Expected 'invalid tag ID' error, got: %v", err)
+	}
+
+	// Test: Non-existent tag
 	_, err = getTagDetails(db, "999")
-	assert.Error(t, err)
-	assert.Equal(t, "Tag not found", err.Error())
+	if err == nil || err.Error() != "tag not found" {
+		t.Errorf("Expected 'tag not found' error, got: %v", err)
+	}
 }
