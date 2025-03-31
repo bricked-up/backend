@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -24,8 +25,8 @@ func generateVerificationCode() string {
 
 // SendVerificationEmail sends an email using gomail with a verification code
 func sendVerificationEmail(to string, code string) {
-	email := "backend@gmail.com"
-	password := "123"
+	email := os.Getenv("EMAIL")
+	password := os.Getenv("PASS")
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", email)
@@ -35,7 +36,7 @@ func sendVerificationEmail(to string, code string) {
 
 	/* email is sent to user without implementation, but I did not
 	know how to implement sending the email without smtp or server access */
-	d := gomail.NewDialer("smtp.example.com", 587, email, password)
+	d := gomail.NewDialer("smtp.gmail.com", 587, email, password)
 	if err := d.DialAndSend(m); err != nil {
 		log.Println("Failed to send email:", err)
 	}
