@@ -9,16 +9,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// Project struct for function argument
-type Project struct {
-	ID       int
-	OrgID    int
-	Name     string
-	Budget   int
-	Charter  string
-	Archived bool
-}
-
 // UpdateProject function updates project
 func updateProject(db *sql.DB, sessionID, projectID int, project Project) error {
 	// First, validate the session and check execution privileges
