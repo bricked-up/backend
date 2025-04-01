@@ -197,7 +197,25 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cookie, err := r.Cookie("bricked-up_login")
+	if err != nil {
+		http.Error(w, "Invalid cookie session", http.StatusUnauthorized)
+		return
+	}
+
+	sessionid, err := strconv.Atoi(cookie.Value)
+	if err != nil {
+		http.Error(w,"Invalid session ID", http.StatusBadRequest)
+		return
+	}
+
 	// Extract and validate form values
+	projectid, err := strconv.Atoi(r.FormValue("projectid"))
+	if err != nil {
+		http.Error(w, "Invalid project ID", http.StatusBadRequest)
+		return
+	}
+
 	title := r.FormValue("title")
 	desc := r.FormValue("desc")
 	tagID, err := strconv.Atoi(r.FormValue("tagid"))
@@ -237,7 +255,18 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call your backend logic
-	issueID, err := CreateIssue(title, desc, tagID, priority, completed, cost, date, db)
+	issueID, err := CreateIssue(
+		sessionid, 
+		projectid, 
+		title, 
+		desc, 
+		tagID, 
+		priority, 
+		completed, 
+		cost, 
+		date, 
+		db)
+
 	if err != nil {
 		http.Error(w, "Failed to create issue: "+err.Error(), http.StatusInternalServerError)
 		log.Println(err)
