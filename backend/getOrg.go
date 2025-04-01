@@ -8,16 +8,12 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-type Org struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
-
+// GetOrg returns a JSON formatted string of an organization entry.
 func GetOrg(db *sql.DB, orgid int) ([]byte, error) {
 
 	row := db.QueryRow(`SELECT id, name FROM organization where id = ?`, orgid)
 
-	var org Org
+	var org Organization
 	if err := row.Scan(&org.ID, &org.Name); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("Organization not found")
