@@ -3,80 +3,73 @@ package backend
 import (
 	"database/sql"
 	"errors"
-
-	_ "modernc.org/sqlite"
+	"fmt"
 )
 
 // Error definitions
 var (
-	ErrIssueNotFound          = errors.New("issue does not exist")
-	ErrInvalidSession         = errors.New("invalid or expired session")
-	ErrSessionVerification    = errors.New("error verifying session")
+	ErrInvalidSession         = errors.New("invalid session")
+	ErrSessionExpired         = errors.New("session expired")
+	ErrIssueNotFound          = errors.New("issue not found")
 	ErrInsufficientPrivileges = errors.New("user does not have write privileges for this project")
-	ErrIssueUpdate            = errors.New("error closing issue")
-	ErrPrivilegeCheck         = errors.New("error checking user privileges")
-	ErrIssueRetrieval         = errors.New("error retrieving issue")
 )
 
-// CloseIssue marks an issue as completed with the current timestamp
-// It requires the user associated with the sessionID to have write privileges in the project containing the issue
+// CloseIssue marks an issue as completed by the current user
 func CloseIssue(db *sql.DB, sessionID int, issueID int) error {
-	// Check if issue exists
-	var projectID int
-	err := db.QueryRow(`
-		SELECT pi.projectid
-		FROM PROJECT_ISSUES pi
-		JOIN ISSUE i ON pi.issueid = i.id
-		WHERE i.id = ?`, issueID).Scan(&projectID)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return ErrIssueNotFound
-		}
-		return errors.Join(ErrIssueRetrieval, err)
-	}
-
-	// Get user ID from session
+	// First check if the session is valid
 	var userID int
-	err = db.QueryRow(`
+	err := db.QueryRow(`
 		SELECT userid FROM SESSION 
-		WHERE id = ? AND expires > datetime('now')`, sessionID).Scan(&userID)
-
+		WHERE id = ? AND expires > datetime('now')
+	`, sessionID).Scan(&userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return ErrInvalidSession
 		}
-		return errors.Join(ErrSessionVerification, err)
+		return err
 	}
 
-	// Check if user has write privileges for the project
-	var hasWriteAccess bool
-	err = db.QueryRow(`
-		SELECT EXISTS (
-			SELECT 1 
-			FROM PROJECT_MEMBER pm
-			JOIN PROJECT_MEMBER_ROLE pmr ON pm.id = pmr.memberid
-			JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
-			WHERE pm.userid = ? AND pm.projectid = ? AND pr.can_write = 1
-		)`, userID, projectID).Scan(&hasWriteAccess)
-
+	// Next check if the issue exists
+	var exists bool
+	err = db.QueryRow(`SELECT EXISTS(SELECT 1 FROM ISSUE WHERE id = ?)`, issueID).Scan(&exists)
 	if err != nil {
-		return errors.Join(ErrPrivilegeCheck, err)
+		return err
+	}
+	if !exists {
+		return ErrIssueNotFound
 	}
 
-	if !hasWriteAccess {
+	// Retrieve project ID for privilege check
+	var projectID int
+	err = db.QueryRow(`SELECT projectid FROM PROJECT_ISSUES WHERE issueid = ?`, issueID).Scan(&projectID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("issue not associated with any project")
+		}
+		return err
+	}
+
+	// Check if the user has write privileges using COUNT(*)
+	var canWrite int
+	err = db.QueryRow(`
+		SELECT COUNT(*) FROM PROJECT_MEMBER pm
+		JOIN PROJECT_MEMBER_ROLE pmr ON pm.id = pmr.memberid
+		JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
+		WHERE pm.userid = ? AND pm.projectid = ? AND pr.can_write = 1
+	`, userID, projectID).Scan(&canWrite)
+	if err != nil {
+		return err
+	}
+	if canWrite == 0 {
 		return ErrInsufficientPrivileges
 	}
 
-	// Update issue to mark it as completed with current timestamp
+	// Use SQLite's strftime to format the current time as "2006-01-02 15:04:05"
 	_, err = db.Exec(`
 		UPDATE ISSUE 
-		SET completed = datetime('now')
-		WHERE id = ?`, issueID)
+		SET completed = strftime('%Y-%m-%d %H:%M:%S', 'now')
+		WHERE id = ?
+	`, issueID)
 
-	if err != nil {
-		return errors.Join(ErrIssueUpdate, err)
-	}
-
-	return nil
+	return err
 }

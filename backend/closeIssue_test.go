@@ -38,7 +38,6 @@ func TestCloseIssue(t *testing.T) {
 		if stmt == "" {
 			continue
 		}
-
 		if _, err := db.Exec(stmt); err != nil {
 			t.Fatalf("failed to execute init statement: %v\nStatement: %s", err, stmt)
 		}
@@ -57,10 +56,82 @@ func TestCloseIssue(t *testing.T) {
 		if stmt == "" {
 			continue
 		}
-
 		if _, err := db.Exec(stmt); err != nil {
 			t.Fatalf("failed to execute populate statement: %v\nStatement: %s", err, stmt)
 		}
+	}
+
+	// Create fresh sessions that won't be expired for our test
+	setupTestSessions := `
+		UPDATE SESSION SET expires = datetime('now', '+1 day') WHERE id IN (1, 2, 3, 4, 5);
+	`
+	_, err = db.Exec(setupTestSessions)
+	if err != nil {
+		t.Fatalf("failed to set up test sessions: %v", err)
+	}
+
+	// Find a valid admin session (a session with write privileges)
+	var validAdminSessionID int
+	err = db.QueryRow(`
+		SELECT s.id FROM SESSION s
+		JOIN USER u ON s.userid = u.id
+		JOIN PROJECT_MEMBER pm ON u.id = pm.userid
+		JOIN PROJECT_MEMBER_ROLE pmr ON pm.id = pmr.memberid
+		JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
+		WHERE s.expires > datetime('now') AND pr.can_write = 1
+		LIMIT 1
+	`).Scan(&validAdminSessionID)
+	if err != nil {
+		t.Log("Could not find a session with write access, setting up our own test data")
+		setupOwnData := `
+			INSERT INTO USER (id, email, password, name, verified) 
+			VALUES (999, 'test@example.com', 'password', 'Test User', 1);
+			
+			INSERT INTO SESSION (id, userid, expires) 
+			VALUES (999, 999, datetime('now', '+1 day'));
+			
+			INSERT INTO PROJECT_MEMBER (id, userid, projectid) VALUES (999, 999, 1);
+			INSERT INTO PROJECT_MEMBER_ROLE (id, memberid, roleid) VALUES (999, 999, 1);
+		`
+		_, err = db.Exec(setupOwnData)
+		if err != nil {
+			t.Fatalf("failed to set up own test data: %v", err)
+		}
+		validAdminSessionID = 999
+	}
+
+	// Find a valid issue ID
+	var validIssueID int
+	err = db.QueryRow("SELECT id FROM ISSUE WHERE completed IS NULL LIMIT 1").Scan(&validIssueID)
+	if err != nil {
+		t.Fatalf("could not find a valid issue to test with: %v", err)
+	}
+
+	// Find a session without write privileges
+	var nonAdminSessionID int
+	err = db.QueryRow(`
+		SELECT s.id FROM SESSION s
+		JOIN USER u ON s.userid = u.id
+		LEFT JOIN PROJECT_MEMBER pm ON u.id = pm.userid
+		LEFT JOIN PROJECT_MEMBER_ROLE pmr ON pm.id = pmr.memberid
+		LEFT JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
+		WHERE s.expires > datetime('now') AND (pr.can_write IS NULL OR pr.can_write = 0)
+		LIMIT 1
+	`).Scan(&nonAdminSessionID)
+	if err != nil {
+		// Create a non-admin user without any write privileges
+		setupNonAdminUser := `
+			INSERT INTO USER (id, email, password, name, verified) 
+			VALUES (998, 'nonadmin@example.com', 'password', 'Non-Admin User', 1);
+			
+			INSERT INTO SESSION (id, userid, expires) 
+			VALUES (998, 998, datetime('now', '+1 day'));
+		`
+		_, err = db.Exec(setupNonAdminUser)
+		if err != nil {
+			t.Fatalf("failed to set up non-admin user: %v", err)
+		}
+		nonAdminSessionID = 998
 	}
 
 	// Test cases
@@ -72,26 +143,26 @@ func TestCloseIssue(t *testing.T) {
 	}{
 		{
 			name:          "Successful Issue Closure",
-			sessionID:     1, // This should be a session ID from your populate.sql with write access
-			issueID:       1, // This should be a valid issue ID from your populate.sql
+			sessionID:     validAdminSessionID,
+			issueID:       validIssueID,
 			expectedError: nil,
 		},
 		{
 			name:          "Issue Does Not Exist",
-			sessionID:     1,
+			sessionID:     validAdminSessionID,
 			issueID:       999, // Non-existent issue ID
 			expectedError: ErrIssueNotFound,
 		},
 		{
 			name:          "Invalid Session",
-			sessionID:     999, // Invalid session ID
-			issueID:       1,
+			sessionID:     9999, // Invalid session ID
+			issueID:       validIssueID,
 			expectedError: ErrInvalidSession,
 		},
 		{
 			name:          "User Without Write Privileges",
-			sessionID:     5, // This should be a session ID from your populate.sql without write access
-			issueID:       1,
+			sessionID:     nonAdminSessionID,
+			issueID:       validIssueID,
 			expectedError: ErrInsufficientPrivileges,
 		},
 	}
@@ -99,7 +170,7 @@ func TestCloseIssue(t *testing.T) {
 	// Run test cases
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Restore issue state before each test if needed (to handle test order independence)
+			// Restore issue state before each test if needed
 			if tc.name == "Successful Issue Closure" {
 				_, err := db.Exec("UPDATE ISSUE SET completed = NULL WHERE id = ?", tc.issueID)
 				if err != nil {
@@ -124,22 +195,25 @@ func TestCloseIssue(t *testing.T) {
 					t.Errorf("failed to retrieve updated issue: %v", err)
 					return
 				}
-
 				if !completed.Valid {
 					t.Errorf("issue not marked as completed")
 					return
 				}
 
-				// Parse completed date and verify it's recent (within last minute)
-				completedTime, err := time.Parse("2006-01-02 15:04:05", completed.String)
+				// Parse the timestamp formatted as "2006-01-02 15:04:05"
+				completedTime, err := time.Parse(time.RFC3339, completed.String)
 				if err != nil {
-					t.Errorf("couldn't parse completed timestamp: %v", err)
-					return
+					// Try parsing using SQLite's default timestamp format
+					completedTime, err = time.Parse("2006-01-02 15:04:05", completed.String)
+					if err != nil {
+						t.Errorf("couldn't parse completed timestamp: %v", err)
+						return
+					}
 				}
 
 				timeDiff := time.Since(completedTime)
 				if timeDiff > time.Minute {
-					t.Errorf("completed timestamp is not recent: %v", completedTime)
+					t.Errorf("completed timestamp is not recent: %v", completed.String)
 				}
 			}
 		})
