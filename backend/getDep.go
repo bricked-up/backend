@@ -3,27 +3,33 @@ package backend
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 
 	_ "modernc.org/sqlite"
 )
 
-type Dep struct {
-	ID int `json:"id"`
-}
-
 // GetDep getches the relations of dependencies of one issue and returns it as a json data
 func getDep(db *sql.DB, issueid int) ([]byte, error) {
-	row := db.QueryRow(`SELECT dependency FROM DEPENDENCY WHERE issueid = ?`, issueid)
-	var dep Dep
-	// Scans the Rows to see if there are any
-	if err := row.Scan(&dep.ID); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("issueid not found")
-		}
+	rows, err := db.Query(`SELECT dependency FROM DEPENDENCY WHERE issueid = ?`, issueid)
+	if err != nil {
+		return nil, err
 	}
+
+	defer rows.Close()
+
+	var dependencies []int64
+	for rows.Next() {
+		var dep int64
+
+		err := rows.Scan(&dep)
+		if err != nil {
+			return nil, err
+		}
+
+		dependencies = append(dependencies, dep)
+	}
+
 	//Convert the Dep struct to JSON
-	jsonDep, err := json.Marshal(dep)
+	jsonDep, err := json.Marshal(dependencies)
 	if err != nil {
 		return nil, err
 	}

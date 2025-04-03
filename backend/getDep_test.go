@@ -45,19 +45,13 @@ func TestGetDep(t *testing.T) {
 			name:     "Issue #3 has dependency 1",
 			issueID:  3,
 			wantErr:  false,
-			wantJSON: `{"id":1}`,
+			wantJSON: `[1]`,
 		},
 		{
 			name:     "Issue #4 has dependency 2",
 			issueID:  4,
 			wantErr:  false,
-			wantJSON: `{"id":2}`,
-		},
-		{
-			name:     "Issue #999 - does not exist",
-			issueID:  999,
-			wantErr:  true,
-			wantJSON: "",
+			wantJSON: `[2]`,
 		},
 	}
 
