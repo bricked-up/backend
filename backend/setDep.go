@@ -3,28 +3,30 @@ package backend
 import (
 	"database/sql"
 	"errors"
+	"strconv"
 
 	_ "modernc.org/sqlite"
 )
 
-func SetDep(db *sql.DB, issueAid int, issueBid int, userid int) error {
+// SetDep assigns the dependency to the issue.
+func SetDep(db *sql.DB, issueid int, dependency int, userid int) error {
 	// Check if the issues exist
 	var existsA, existsB bool
 
-	err := db.QueryRow("SELECT COUNT(*) > 0 FROM ISSUE WHERE id = ?", issueAid).Scan(&existsA)
+	err := db.QueryRow("SELECT COUNT(*) > 0 FROM ISSUE WHERE id = ?", issueid).Scan(&existsA)
 	if err != nil {
 		return err
 	}
 	if !existsA {
-		return errors.New("issueAid does not exist")
+		return errors.New("issue does not exist: " + strconv.Itoa(issueid))
 	}
 
-	err = db.QueryRow("SELECT COUNT(*) > 0 FROM ISSUE WHERE id = ?", issueBid).Scan(&existsB)
+	err = db.QueryRow("SELECT COUNT(*) > 0 FROM ISSUE WHERE id = ?", dependency).Scan(&existsB)
 	if err != nil {
 		return err
 	}
 	if !existsB {
-		return errors.New("issueBid does not exist")
+		return errors.New("issue does not exist: " + strconv.Itoa(dependency))
 	}
 
 	// Check if the user has write access to both issues
@@ -37,7 +39,7 @@ func SetDep(db *sql.DB, issueAid int, issueBid int, userid int) error {
         WHERE pi.issueid IN (?, ?)
           AND pm.userid = ?;
     `
-	rows, err := db.Query(query, issueBid, issueAid, userid)
+	rows, err := db.Query(query, dependency, issueid, userid)
 	if err != nil {
 		return err
 	}
@@ -56,13 +58,13 @@ func SetDep(db *sql.DB, issueAid int, issueBid int, userid int) error {
 	}
 
 	// Ensure access exists for both issues
-	if !access[issueAid] || !access[issueBid] {
+	if !access[issueid] || !access[dependency] {
 		return errors.New("user lacks write access to one or both issues")
 	}
 
 	// Check for existing dependency
 	var alreadyExists bool
-	err = db.QueryRow("SELECT COUNT(*) > 0 FROM DEPENDENCY WHERE issueid = ? AND dependency = ?", issueBid, issueAid).Scan(&alreadyExists)
+	err = db.QueryRow("SELECT COUNT(*) > 0 FROM DEPENDENCY WHERE issueid = ? AND dependency = ?", dependency, issueid).Scan(&alreadyExists)
 	if err != nil {
 		return err
 	}
@@ -71,7 +73,7 @@ func SetDep(db *sql.DB, issueAid int, issueBid int, userid int) error {
 	}
 
 	// Insert the dependency
-	_, err = db.Exec("INSERT INTO DEPENDENCY (issueid, dependency) VALUES (?, ?)", issueBid, issueAid)
+	_, err = db.Exec("INSERT INTO DEPENDENCY (issueid, dependency) VALUES (?, ?)", dependency, issueid)
 	if err != nil {
 		return err
 	}
