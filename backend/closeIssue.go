@@ -3,7 +3,6 @@ package backend
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 )
 
 // Error definitions
@@ -44,7 +43,7 @@ func CloseIssue(db *sql.DB, sessionID int, issueID int) error {
 	err = db.QueryRow(`SELECT projectid FROM PROJECT_ISSUES WHERE issueid = ?`, issueID).Scan(&projectID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("issue not associated with any project")
+			return ErrIssueNotFound
 		}
 		return err
 	}
