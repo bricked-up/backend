@@ -8,14 +8,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// User holds the columns returned by the SELECT query (minus the password).
-type User struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Verified bool   `json:"verified"`
-	Avatar   string `json:"avatar"`
-}
 
 // GetUserDetails fetches one user by ID from the DB and returns JSON data.
 func getUserDetails(db *sql.DB, userID int) ([]byte, error) {

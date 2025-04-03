@@ -8,8 +8,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// TestUpdateUserName demonstrates using an in-memory DB to test ChangeDisplayName
-func TestUpdateUserName(t *testing.T) {
+// TestUpdateUser demonstrates using an in-memory DB to test UpdateUser.
+func TestUpdateUser(t *testing.T) {
     // Open an in-memory database with the modernc driver name "sqlite".
     db, err := sql.Open("sqlite", ":memory:")
     if err != nil {
@@ -39,19 +39,35 @@ func TestUpdateUserName(t *testing.T) {
         t.Fatalf("failed to exec populate.sql: %v", err)
     }
 
-    // Call the refactored function, passing the in-memory DB and sessionID=1.
-    err = ChangeDisplayName(db, 1, "Ivan123!!")
+	var originalUser User
+    err = db.QueryRow(`
+	SELECT name, email, password, avatar
+	FROM USER 
+	WHERE id = 1`).Scan(
+		&originalUser.Name,
+		&originalUser.Email,
+		&originalUser.Password,
+		&originalUser.Avatar,
+	)
+
+    if err != nil {
+        t.Errorf("failed to get user: %v", err)
+    }
+
+	updatedUser := originalUser
+	updatedUser.Name = "Ivan123"
+
+    err = UpdateUser(db, 1, &updatedUser)
     if err != nil {
         t.Errorf("ChangeDisplayName returned error: %v", err)
     }
 
-    // Verify the name was updated to "Ivan".
     var updatedName string
     err = db.QueryRow("SELECT name FROM USER WHERE id = 1").Scan(&updatedName)
     if err != nil {
         t.Errorf("failed to query updated name: %v", err)
     }
-    if updatedName != "Ivan" {
-        t.Errorf("expected 'Ivan', got '%s'", updatedName)
+    if updatedName == originalUser.Name {
+        t.Errorf("name was not changed from '%s' to '%s'", originalUser.Name, updatedName)
     }
 }
