@@ -18,7 +18,7 @@ var endpoints = map[string]DBHandlerFunc{
 	"/login":                   LoginHandler,
     "/signup":                  SignupHandler,
     "/verify":                  VerifyHandler,
-    "/change-name":            ChangeNameHandler,
+    "/user-update":            UserUpdateHandler,
     "/create-issue":           CreateIssueHandler,
     "/create-tag":             CreateTagHandler,
     "/delete-user":            DeleteUserHandler,
@@ -142,8 +142,8 @@ func VerifyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "TODO: verify")
 }
 
-// ChangeNameHandler updates the display name for the logged-in user.
-func ChangeNameHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
+// UserUpdateHandler updates the logged-in user's information.
+func UserUpdateHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w,"Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -168,13 +168,14 @@ func ChangeNameHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newName := r.FormValue("name")
-	if newName == "" {
-		http.Error(w, "Name cannot be empty", http.StatusBadRequest)
-		return
-	}
+	var user User
 
-	err = ChangeDisplayName(db, sessionID, newName) 
+	user.Name = r.FormValue("name")
+	user.Email = r.FormValue("email")
+	user.Password = r.FormValue("password")
+	user.Avatar = r.FormValue("avatar")
+
+	err = UpdateUser(db, sessionID, &user) 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Println(err.Error())
@@ -182,7 +183,6 @@ func ChangeNameHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Name succesfully changed to %s", newName)
 }
 
 // CreateIssueHandler inserts a new issue into the database.

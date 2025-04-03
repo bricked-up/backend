@@ -47,36 +47,31 @@ func TestGetUserDetails(t *testing.T) {
             name:    "User #1 - John Doe",
             userID:  1,
             wantErr: false,
-            // verified = true
-            wantJSON: `{"id":1,"name":"John Doe","email":"john.doe@example.com","verified":true,"avatar":"avatar1.png"}`,
+            wantJSON: `{"id":1,"name":"John Doe","email":"john.doe@example.com","password":"","avatar":"avatar1.png","verified":true}`,
         },
         {
             name:    "User #2 - Jane Smith",
             userID:  2,
             wantErr: false,
-            // verified = true
-            wantJSON: `{"id":2,"name":"Jane Smith","email":"jane.smith@example.com","verified":true,"avatar":"avatar2.png"}`,
+            wantJSON: `{"id":2,"name":"Jane Smith","email":"jane.smith@example.com","password":"","avatar":"avatar2.png","verified":true}`,
         },
         {
-            name:    "User #3 - Mike Johnson (verifyid=NULL => 0)",
+            name:    "User #3 - Mike Johnson",
             userID:  3,
             wantErr: false,
-            // verified => true
-            wantJSON: `{"id":3,"name":"Mike Johnson","email":"mike.johnson@example.com","verified":true,"avatar":"avatar3.png"}`,
+            wantJSON: `{"id":3,"name":"Mike Johnson","email":"mike.johnson@example.com","password":"","avatar":"avatar3.png","verified":true}`,
         },
         {
-            name:    "User #4 - Sarah Williams (verifyid=NULL => 0)",
+            name:    "User #4 - Sarah Williams",
             userID:  4,
             wantErr: false,
-            // verified = false
-            wantJSON: `{"id":4,"name":"Sarah Williams","email":"sarah.williams@example.com","verified":false,"avatar":"avatar4.png"}`,
+            wantJSON: `{"id":4,"name":"Sarah Williams","email":"sarah.williams@example.com","password":"","avatar":"avatar4.png","verified":false}`,
         },
         {
-            name:    "User #5 - Alex Brown (verifyid=NULL => 0)",
+            name:    "User #5 - Alex Brown",
             userID:  5,
             wantErr: false,
-            // verified = false
-            wantJSON: `{"id":5,"name":"Alex Brown","email":"alex.brown@example.com","verified":false,"avatar":"avatar5.png"}`,
+            wantJSON: `{"id":5,"name":"Alex Brown","email":"alex.brown@example.com","password":"","avatar":"avatar5.png","verified":false}`,
         },
         {
             // Non-existent row = expect an error
