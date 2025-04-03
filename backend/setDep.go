@@ -9,11 +9,24 @@ import (
 )
 
 // SetDep assigns the dependency to the issue.
-func SetDep(db *sql.DB, issueid int, dependency int, userid int) error {
+func SetDep(db *sql.DB, issueid int, dependency int, sessionid int) error {
+
+	// Look up the userID in the SESSION table.
+	var userid int
+	err := db.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionid).Scan(&userid)
+	if err != nil {
+		// If no row is found, return a custom error message.
+		if err == sql.ErrNoRows {
+			return errors.New("no session found for session ID " + strconv.Itoa(sessionid))
+		}
+		// Otherwise, return the original error from the DB.
+		return err
+	}
+
 	// Check if the issues exist
 	var existsA, existsB bool
 
-	err := db.QueryRow("SELECT COUNT(*) > 0 FROM ISSUE WHERE id = ?", issueid).Scan(&existsA)
+	err = db.QueryRow("SELECT COUNT(*) > 0 FROM ISSUE WHERE id = ?", issueid).Scan(&existsA)
 	if err != nil {
 		return err
 	}
