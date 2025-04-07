@@ -25,6 +25,7 @@ var endpoints = map[string]DBHandlerFunc{
     "/delete-tag":             DeleteTagHandler,
     "/issue":                  GetIssueDetailsHandler,
     "/org-members":            GetOrgMembersHandler,
+    "/proj-members":           GetProjMembersHandler,
     "/create-org":             CreateOrganizationHandler,
     "/delete-org":             DeleteOrganizationHandler,
     "/remove-org-member-role": RemoveOrgMemberRoleHandler,
@@ -457,7 +458,7 @@ func GetIssueDetailsHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) 
 	w.Write([]byte(jsonStr))
 }
 
-// getOrgMembersHandler handles GET requests to retrieve all user IDs 
+// GetOrgMembersHandler handles GET requests to retrieve all user IDs 
 // belonging to a specific organization.
 // It expects an `orgid` query parameter, then returns a JSON array.
 func GetOrgMembersHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
@@ -481,6 +482,40 @@ func GetOrgMembersHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	// Call the core logic function
 	jsonResult, err := GetOrgMembers(db, orgID)
+	if err != nil {
+		http.Error(w, "Failed to get org members: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return JSON response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, jsonResult)
+}
+
+// GetProjMembersHandler handles GET requests to retrieve all user IDs 
+// belonging to a specific project.
+// It expects an `projectid` query parameter, then returns a JSON array.
+func GetProjMembersHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	projIDStr := r.URL.Query().Get("projectid")
+	if projIDStr == "" {
+		http.Error(w, "Missing orgid parameter", http.StatusBadRequest)
+		return
+	}
+
+	projID, err := strconv.Atoi(projIDStr)
+	if err != nil {
+		http.Error(w, "Invalid orgid", http.StatusBadRequest)
+		return
+	}
+
+	// Call the core logic function
+	jsonResult, err := GetProjMembers(db, projID)
 	if err != nil {
 		http.Error(w, "Failed to get org members: "+err.Error(), http.StatusInternalServerError)
 		return
