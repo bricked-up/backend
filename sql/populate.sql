@@ -6,9 +6,9 @@ INSERT INTO ORGANIZATION (name) VALUES
 
 -- Populate VERIFY_USER table
 INSERT INTO VERIFY_USER (code, expires) VALUES
-(123456, '2025-04-11'),
-(234567, '2025-04-12'),
-(345678, '2025-04-13');
+(123456, '3035-04-11'),
+(234567, '3025-04-12'),
+(345678, '3025-04-13');
 
 -- Populate USER table
 INSERT INTO USER (verifyid, email, password, name, avatar, verified) VALUES

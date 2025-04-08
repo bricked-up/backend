@@ -14,24 +14,18 @@ Please refer to [[https://github.com/bricked-up/requirements][requirements]] (fo
 * Endpoints
  All communication between the [[https://github.com/bricked-up/frontend][frontend]] and backend will take place over HTTP. The body of the request and the response will be a ~string~. If a more complex struct of information is required, JSON will be used. In the case of *failure* the response body will contain an error message (~string~) on the relevant error.
 
- Here are the HTTP response codes we will use:
+ We will be using the standard HTTP codes to signify if the request succeeded or not.
 
-  | Status Code | Event                                                         |
-  |-------------+---------------------------------------------------------------|
-  |         200 | Ok                                                            |
-  |         400 | Invalid request                                               |
-  |         401 | Unauthorized (client lacks permission to access the endpoint) |
-  |         405 | Method not allowed (e.g. using GET instead of POST)           |
-  |         500 | Error in the server (e.g. server crashes)                     |
-
- *NOTE*: "Request" and "Response" are from the perspective of the server.
-
- | Endpoint   | HTTP Method | Description                              |
- |------------+-------------+------------------------------------------|
- | [[https://github.com/bricked-up/backend/issues/7][/signup]]    | POST        | Create user account.                     |
- | [[https://github.com/bricked-up/backend/issues/8][/verify]]    | POST        | Verify user account.                     |
- | [[https://github.com/bricked-up/backend/issues/6][/login]]     | POST        | Check if user's credentials are correct. |
- | [[https://github.com/bricked-up/backend/issues/10][/user]]      | DELETE      | Delete user account.                     |
- | [[https://github.com/bricked-up/backend/issues/11][/user]]      | PATCH       | Edit user data.                          |
- | [[https://github.com/bricked-up/backend/issues/9][/org]]       | POST        | Create an organization.                  |
- | [[https://github.com/bricked-up/backend/issues/13][/org]]       | DELETE      | Delete an organization.                  |
+ | Endpoint      | HTTP Method | Description                                                                |
+ |---------------+-------------+----------------------------------------------------------------------------|
+ | [[https://github.com/bricked-up/backend/issues/7][/signup]]       | POST        | Create user account.                                                       |
+ | [[https://github.com/bricked-up/backend/issues/8][/verify]]       | POST        | Verify user account.                                                       |
+ | [[https://github.com/bricked-up/backend/issues/6][/login]]        | POST        | Check if user's credentials are correct.                                   |
+ | [[https://github.com/bricked-up/backend/issues/73][/get-user]]     | GET         | Get user's details and projects and organizations that they are a part of. |
+ | [[https://github.com/bricked-up/backend/issues/10][/delete-user]]  | DELETE      | Delete user account.                                                       |
+ | [[https://github.com/bricked-up/backend/issues/11][/update-user]]  | PATCH       | Edit user data.                                                            |
+ | [[https://github.com/bricked-up/backend/issues/43][/create-issue]] | POST        | Create a new issue in a project.                                           |
+ | [[https://github.com/bricked-up/backend/issues/75][/get-issue]]    | GET         | Retrieve information about an issue.                                       |
+ | [[https://github.com/bricked-up/backend/issues/81][/delete-tag]]   | DELETE      | Deletes a tag.                                                             |
+ | [[https://github.com/bricked-up/backend/issues/9][/org]]          | POST        | Create an organization.                                                    |
+ | [[https://github.com/bricked-up/backend/issues/13][/org]]          | DELETE      | Delete an organization.                                                    |
