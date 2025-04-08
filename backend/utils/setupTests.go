@@ -14,7 +14,7 @@ func SetupTest(t *testing.T) *sql.DB {
 	if err != nil {
 		t.Fatalf("failed to open in-memory database: %v", err)
 	}
-	initSQL, err := os.ReadFile("../sql/init.sql")
+	initSQL, err := os.ReadFile("../../sql/init.sql")
 	if err != nil {
 		t.Fatalf("failed to read init.sql: %v", err)
 	}
@@ -22,7 +22,7 @@ func SetupTest(t *testing.T) *sql.DB {
 	if err != nil {
 		t.Fatalf("failed to execute init.sql: %v", err)
 	}
-	populateSQL, err := os.ReadFile("../sql/populate.sql")
+	populateSQL, err := os.ReadFile("../../sql/populate.sql")
 	if err != nil {
 		t.Fatalf("failed to read populate.sql: %v", err)
 	}
