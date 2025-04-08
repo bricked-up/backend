@@ -21,6 +21,7 @@ var endpoints = map[string]DBHandlerFunc{
     "/user-update":            UserUpdateHandler,
     "/create-issue":           CreateIssueHandler,
     "/create-tag":             CreateTagHandler,
+	"/get-user":               GetUserHandler,
     "/delete-user":            DeleteUserHandler,
     "/delete-tag":             DeleteTagHandler,
     "/issue":                  GetIssueDetailsHandler,
@@ -327,9 +328,41 @@ func CreateTagHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Tag created successfully with ID %d", tagID)
 }
 
-// deleteUserHandler handles POST requests to delete the currently logged-in user.
+// GetUserHandler handles GET requests to retrieve information about the logged-in user.
+func GetUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+
+	// Get session cookie
+	cookie, err := r.Cookie("bricked-up_login")
+	if err != nil {
+		http.Error(w, "Missing session cookie", http.StatusUnauthorized)
+		return
+	}
+
+	sessionID := cookie.Value
+	sessionid, err := strconv.Atoi(sessionID)
+	if err != nil {
+		http.Error(w, "Invalid sessionid", http.StatusUnauthorized)
+	}
+
+	user, err := GetUser(db, sessionid)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(user))
+}
+
+// DeleteUserHandler handles POST requests to delete the currently logged-in user.
 // It reads the session cookie, validates it, and calls deleteUser to remove all user data.
-func DeleteUserHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func DeleteUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -368,7 +401,6 @@ func DeleteUserHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	// Respond with success
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "User successfully deleted")
 }
 
 // deleteTagHandler handles POST requests to delete a tag by its ID.

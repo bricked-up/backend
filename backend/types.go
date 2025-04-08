@@ -1,13 +1,16 @@
 package backend
 
-// User contains the details of a user.
+// User contains the details of a user along with all projects
+// and organizations that they are a part of.
 type User struct {
-	ID			int 		`json:"id"`
-	Name 		string		`json:"name"`
-	Email   	string 		`json:"email"`
-	Password 	string 		`json:"password"`
-	Avatar 		string 		`json:"avatar"`
-	Verified    bool		`json:"verified"`
+	ID				int 		`json:"id"`
+	Name 			string		`json:"name"`
+	Email   		string 		`json:"email"`
+	Password 		string 		`json:"password"`
+	Avatar 			string 		`json:"avatar"`
+	Verified    	bool		`json:"verified"`
+	Projects		[]int
+	Organizations	[]int
 }
 
 // Project contains the details of a project.
