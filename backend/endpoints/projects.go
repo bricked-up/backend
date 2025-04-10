@@ -3,7 +3,6 @@ package endpoints
 import (
 	"brickedup/backend/projects"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -107,38 +106,3 @@ func DeleteTagHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	// Return success
 	w.WriteHeader(http.StatusOK)
 }
-
-// GetProjMembersHandler handles GET requests to retrieve all user IDs 
-// belonging to a specific project on /get-proj-members.
-// It expects an `projectid` URL query parameter, then returns a JSON array.
-func GetProjMembersHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	projIDStr := r.URL.Query().Get("projectid")
-	if projIDStr == "" {
-		http.Error(w, "Missing orgid parameter", http.StatusBadRequest)
-		return
-	}
-
-	projID, err := strconv.Atoi(projIDStr)
-	if err != nil {
-		http.Error(w, "Invalid orgid", http.StatusBadRequest)
-		return
-	}
-
-	// Call the core logic function
-	jsonResult, err := projects.GetProjMembers(db, projID)
-	if err != nil {
-		http.Error(w, "Failed to get org members: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Return JSON response
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, jsonResult)
-}
-

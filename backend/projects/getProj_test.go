@@ -8,8 +8,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// TestGetProjectDetails tests the GetProjectDetails function
-func TestGetProjectDetails(t *testing.T) {
+// TestGetProject tests the GetProjectDetails function
+func TestGetProject(t *testing.T) {
 	db := utils.SetupTest(t)
 	defer db.Close()
 
@@ -25,13 +25,10 @@ func TestGetProjectDetails(t *testing.T) {
 	// Run tests
 	for _, tt := range tests {
 		t.Run("Testing project ID "+strconv.Itoa(tt.projectID), func(t *testing.T) {
-			_, err := GetProjectDetails(db, tt.projectID)
+			_, err := GetProject(db, tt.projectID)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetProjectDetails() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetProject() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
-
-	// Close the database after tests are done
-	defer db.Close()
 }

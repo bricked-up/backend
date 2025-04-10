@@ -21,6 +21,10 @@ type Project struct {
 	Budget   int		`json:"budget"`
 	Charter  string		`json:"charter"`
 	Archived bool		`json:"archived"`
+	Members []int 		`json:"members"`
+	Issues  []int		`json:"issues"`
+	Tags	[]int		`json:"tags"`
+	Roles 	[]int		`json:"roles"`
 }
 
 // Organization contains the details of an organization.
