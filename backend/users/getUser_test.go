@@ -15,13 +15,15 @@ func TestGetUser(t *testing.T) {
 
 	validUser, err := json.Marshal(
 				utils.User{
+					ID: 1,
 					Name: "John Doe",
 					Email: "john.doe@example.com",
 					Password: "",
 					Avatar: "avatar1.png",
 					Verified: true,
 					Projects: []int{ 1, 2 },
-					Organizations: nil,
+					Organizations: []int{1},
+					Issues: []int{1},
 				})
 
 	if err != nil {

@@ -9,8 +9,9 @@ type User struct {
 	Password 		string 		`json:"password"`
 	Avatar 			string 		`json:"avatar"`
 	Verified    	bool		`json:"verified"`
-	Projects		[]int
-	Organizations	[]int
+	Projects		[]int 		`json:"projects"`
+	Organizations	[]int		`json:"organizations"`
+	Issues			[]int 		`json:"issues"`
 }
 
 // Project contains the details of a project.
