@@ -1,45 +1,62 @@
 package issues
 
 import (
+	"brickedup/backend/utils"
 	"database/sql"
 	"encoding/json"
 
 	_ "modernc.org/sqlite"
 )
 
+// GetIssueDep fetches all issues that the issue depends on.
+func getIssueDep(db *sql.DB, issue *utils.Issue) error {
+	rows, err := db.Query(
+		`SELECT dependency FROM DEPENDENCY WHERE issueid = ?`,
+		issue.ID)
+
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var dep int
+
+		err := rows.Scan(&dep)
+		if err != nil {
+			return err
+		}
+
+		issue.Dependencies = append(issue.Dependencies, dep)
+	}
+
+	return nil
+}
+
 // GetIssue fetches issue details and returns them as a JSON string
 func GetIssue(db *sql.DB, issueid int) (string, error) {
+	row := db.QueryRow("SELECT title, desc, tagid, priority, created, completed, cost FROM ISSUE WHERE id = ?", issueid)
 
-	row := db.QueryRow("SELECT id, title, desc, tagid, priority, created, completed, cost FROM ISSUE WHERE id = ?", issueid)
-
-	// Variables to store fetched data
-	var id, tagid, priority, cost int
-	var title, description string
-	var created, completed sql.NullTime
+	var issue utils.Issue
+	issue.ID = issueid
 
 	// Scan row into variables
-	err := row.Scan(&id, &title, &description, &tagid, &priority, &created, &completed, &cost)
+	err := row.Scan(
+		&issue.Title, 
+		&issue.Desc, 
+		&issue.TagID, 
+		&issue.Priority, 
+		&issue.Created, 
+		&issue.Completed, 
+		&issue.Cost)
+
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return "", err
-		}
 		return "", err
 	}
 
-	// Convert the issue details into a map
-	issueDetails := map[string]interface{}{
-		"id":          id,
-		"title":       title,
-		"description": description,
-		"tagid":       tagid,
-		"priority":    priority,
-		"created":     created.Time,
-		"completed":   completed.Time,
-		"cost":        cost,
-	}
-
 	// Convert map to JSON
-	jsonData, err := json.Marshal(issueDetails)
+	jsonData, err := json.Marshal(issue)
 	if err != nil {
 		return "", err
 	}

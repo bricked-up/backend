@@ -1,5 +1,10 @@
 package utils
 
+import (
+	"database/sql"
+	"time"
+)
+
 // User contains the details of a user along with all projects
 // and organizations that they are a part of.
 type User struct {
@@ -26,6 +31,18 @@ type Project struct {
 	Issues  []int		`json:"issues"`
 	Tags	[]int		`json:"tags"`
 	Roles 	[]int		`json:"roles"`
+}
+
+type Issue struct {
+	ID       		int				`json:"id"`
+	Title    		string			`json:"title"`
+	Desc     		string			`json:"desc"`
+	Cost			int				`json:"cost"`
+	TagID    		int				`json:"tagid"`
+	Priority 		int				`json:"priority"`
+	Created  		time.Time		`json:"created"`
+	Completed  		sql.NullTime	`json:"completed"`
+	Dependencies	[]int			`json:"dependencies"`
 }
 
 // Organization contains the details of an organization.
