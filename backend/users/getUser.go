@@ -9,7 +9,10 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// Gets all projects that the user is a part of.
 func getUserProjects(db *sql.DB, user *utils.User) error {
+	user.Projects = nil
+
 	rows, err := db.Query(
 		`SELECT projectid 
 		FROM PROJECT_MEMBER
@@ -33,7 +36,10 @@ func getUserProjects(db *sql.DB, user *utils.User) error {
 	return nil
 }
 
+// Gets all organizations that the user is a part of.
 func getUserOrganizations(db *sql.DB, user *utils.User) error {
+	user.Organizations = nil
+
 	rows, err := db.Query(
 		`SELECT orgid 
 		FROM ORG_MEMBER
@@ -57,7 +63,10 @@ func getUserOrganizations(db *sql.DB, user *utils.User) error {
 	return nil
 }
 
+// Gets all issues that have been assigned to the user.
 func getUserIssues(db *sql.DB, user *utils.User) error {
+	user.Issues = nil
+
 	rows, err := db.Query(
 		`SELECT issueid 
 		FROM USER_ISSUES
@@ -84,7 +93,6 @@ func getUserIssues(db *sql.DB, user *utils.User) error {
 
 // GetUser fetches one user by userid from the DB and returns JSON data.
 func GetUser(db *sql.DB, userid int) ([]byte, error) {
-
 	// Get exactly one row for the given userID.
 	row := db.QueryRow(`SELECT name, email, verified, avatar FROM USER WHERE id = ?`, userid)
 

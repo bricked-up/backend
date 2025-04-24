@@ -11,6 +11,8 @@ import (
 
 // GetOrgMembers retrieves all member IDs belonging to a specific organization.
 func getOrgMembers(db *sql.DB, org *utils.Organization) error {
+	org.Members = nil
+
 	// Prepare query to get all members of the organization
 	query := `
 		SELECT userid 
@@ -44,6 +46,8 @@ func getOrgMembers(db *sql.DB, org *utils.Organization) error {
 
 // GetOrgProjects fetches all projects belonging to an organization.
 func getOrgProjects(db *sql.DB, org *utils.Organization) error {
+	org.Projects = nil
+
 	rows, err := db.Query(
 		`SELECT id
 		FROM PROJECT 
@@ -70,6 +74,8 @@ func getOrgProjects(db *sql.DB, org *utils.Organization) error {
 
 // GetOrgRoles retrieves an array of all roles belonging to an organization.
 func getOrgRoles(db *sql.DB, org *utils.Organization) error {
+	org.Roles = nil
+
 	rows, err := db.Query(
 		`SELECT id
 		FROM ORG_ROLE
