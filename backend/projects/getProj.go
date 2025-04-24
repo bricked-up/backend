@@ -10,7 +10,9 @@ import (
 )
 
 // GetProjMembers retrieves all member IDs belonging to a specific project.
-func getProjMembers(db *sql.DB, projID int) ([]int, error) {
+func getProjMembers(db *sql.DB, proj *utils.Project) error {
+	proj.Members = nil
+
 	query := `
 		SELECT userid 
 		FROM PROJECT_MEMBER 
@@ -18,42 +20,41 @@ func getProjMembers(db *sql.DB, projID int) ([]int, error) {
 	`
 
 	// Execute the query
-	rows, err := db.Query(query, projID)
+	rows, err := db.Query(query, proj.ID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer rows.Close()
 
 	// Collect all user IDs
-	var memberIDs []int
 	for rows.Next() {
 		var userID int
 		if err := rows.Scan(&userID); err != nil {
-			return nil, err
+			return err
 		}
-		memberIDs = append(memberIDs, userID)
+		proj.Members = append(proj.Members, userID)
 	}
 
 	// Check for errors during row iteration
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return err
 	}
 
-	return memberIDs, nil
+	return nil
 }
 
 // GetProjTags fetches all tags belonging to a project.
-func getProjTags(db *sql.DB, projectid int) ([]int, error) {
-	var tags []int
+func getProjTags(db *sql.DB, proj *utils.Project) error {
+	proj.Tags = nil
 
 	rows, err := db.Query(
 		`SELECT id
 		FROM TAG 
 		WHERE projectid = ?`, 
-		projectid)
+		proj.ID)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for rows.Next() {
@@ -61,27 +62,27 @@ func getProjTags(db *sql.DB, projectid int) ([]int, error) {
 
 		err = rows.Scan(&tagid)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		tags = append(tags, tagid)
+		proj.Tags = append(proj.Tags, tagid)
 	}
 
-	return tags, nil
+	return nil
 }
 
 // GetProjIssues retrieves an array of all issues belonging to a project.
-func getProjIssues(db *sql.DB, projectid int) ([]int, error) {
-	var issues []int
+func getProjIssues(db *sql.DB, proj *utils.Project) error {
+	proj.Issues = nil
 
 	rows, err := db.Query(
 		`SELECT issueid
 		FROM PROJECT_ISSUES 
 		WHERE projectid = ?`, 
-		projectid)
+		proj.ID)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for rows.Next() {
@@ -89,27 +90,27 @@ func getProjIssues(db *sql.DB, projectid int) ([]int, error) {
 
 		err = rows.Scan(&issueid)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		issues = append(issues, issueid)
+		proj.Issues = append(proj.Issues, issueid)
 	}
 
-	return issues, nil
+	return nil
 }
 
 // GetProjRoles retrieves an array of all issues belonging to a project.
-func getProjRoles(db *sql.DB, projectid int) ([]int, error) {
-	var roles []int
+func getProjRoles(db *sql.DB, proj *utils.Project) error {
+	proj.Roles = nil
 
 	rows, err := db.Query(
 		`SELECT id
 		FROM PROJECT_ROLE
 		WHERE projectid = ?`, 
-		projectid)
+		proj.ID)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for rows.Next() {
@@ -117,18 +118,17 @@ func getProjRoles(db *sql.DB, projectid int) ([]int, error) {
 
 		err = rows.Scan(&roleid)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		roles = append(roles, roleid)
+		proj.Roles = append(proj.Roles, roleid)
 	}
 
-	return roles, nil
+	return nil
 }
 
 // GetProject fetches all the details of a project and returns them as a JSON string
 func GetProject(db *sql.DB, projectID int) (string, error) {
-
 	// validate projectID is not null or negative value
 	if projectID <= 0 {
 		return "", errors.New("invalid project ID")
@@ -156,23 +156,19 @@ func GetProject(db *sql.DB, projectID int) (string, error) {
 		return "", err
 	}
 
-	project.Members, err = getProjMembers(db, projectID)
-	if err != nil {
+	if err := getProjMembers(db, &project); err != nil {
 		return "", err
 	}
 
-	project.Tags, err = getProjTags(db, projectID)
-	if err != nil {
+	if err := getProjTags(db, &project); err != nil {
 		return "", err
 	}
 
-	project.Issues, err = getProjIssues(db, projectID)
-	if err != nil {
+	if err := getProjIssues(db, &project); err != nil {
 		return "", err
 	}
 
-	project.Roles, err = getProjRoles(db, projectID)
-	if err != nil {
+	if err := getProjRoles(db, &project); err != nil {
 		return "", err
 	}
 
