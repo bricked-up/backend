@@ -9,10 +9,10 @@ import (
 	"strconv"
 )
 
-// GetOrgMembersHandler handles GET requests to retrieve all user IDs
-// belonging to a specific organization on /get-org-members.
+// GetOrg handles GET requests to retrieve all information 
+// about a specific organization on /get-org.
 // It expects an `orgid` URL query parameter, then returns a JSON array.
-func GetOrgMembersHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func GetOrgHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -32,9 +32,9 @@ func GetOrgMembersHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the core logic function
-	jsonResult, err := organizations.GetOrgMembers(db, orgID)
+	jsonResult, err := organizations.GetOrg(db, orgID)
 	if err != nil {
-		http.Error(w, "Failed to get org members: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to get org: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 

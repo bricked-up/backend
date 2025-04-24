@@ -21,19 +21,19 @@ func TestGetOrg(t *testing.T) {
 			id:       1,
 			name:     "TechCorp Solutions",
 			wantErr:  false,
-			wantJSON: `{"id":1,"name":"TechCorp Solutions"}`,
+			wantJSON: `{"id":1,"name":"TechCorp Solutions","members":[1,2,3],"projects":[1,2,3],"roles":[1,2,3]}`,
 		},
 		{
 			id:       2,
 			name:     "Creative Designs Inc",
 			wantErr:  false,
-			wantJSON: `{"id":2,"name":"Creative Designs Inc"}`,
+			wantJSON: `{"id":2,"name":"Creative Designs Inc","members":[2,4],"projects":[4,5],"roles":[4,5]}`,
 		},
 		{
 			id:       3,
 			name:     "Data Innovations LLC",
 			wantErr:  false,
-			wantJSON: `{"id":3,"name":"Data Innovations LLC"}`,
+			wantJSON: `{"id":3,"name":"Data Innovations LLC","members":[5,3],"projects":[6],"roles":[6,7]}`,
 		},
 		{
 			id:       999,

@@ -30,7 +30,10 @@ type Project struct {
 
 // Organization contains the details of an organization.
 type Organization struct {
-	ID    int 			`json:"id"`
-	Name  string		`json:"name"`
+	ID    		int 		`json:"id"`
+	Name  		string		`json:"name"`
+	Members 	[]int 		`json:"members"`
+	Projects 	[]int 		`json:"projects"`
+	Roles 		[]int		`json:"roles"`
 }
 
