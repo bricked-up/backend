@@ -106,3 +106,48 @@ func DeleteTagHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	// Return success
 	w.WriteHeader(http.StatusOK)
 }
+
+// ArchiveProjHandler handles POST requests to archive a project by its ID on 
+// /archive-proj.
+// The session is used to validate whether the user has the necessary permissions.
+func ArchiveProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	// Read session ID from cookie
+	cookie, err := r.Cookie(LoginCookie)
+	if err != nil {
+		http.Error(w, "Missing session cookie", http.StatusUnauthorized)
+		return
+	}
+
+	sessionID, err := strconv.Atoi(cookie.Value)
+	if err != nil {
+		http.Error(w, "Invalid session ID", http.StatusBadRequest)
+		return
+	}
+
+	// Parse form values
+	projectID, err := strconv.Atoi(r.FormValue("projectid"))
+	if err != nil {
+		http.Error(w, "Invalid or missing project ID", http.StatusBadRequest)
+		return
+	}
+
+	err = projects.ArchiveProj(db, sessionID, projectID)
+	if err != nil {
+		http.Error(w, "Failed to archive project: "+err.Error(), http.StatusForbidden)
+		log.Println("ArchiveProj error:", err)
+		return
+	}
+
+	// Return success
+	w.WriteHeader(http.StatusOK)
+}
