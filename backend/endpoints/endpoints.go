@@ -29,4 +29,5 @@ var Endpoints = map[string]DBHandlerFunc{
 	"/delete-org":             	DeleteOrganizationHandler,
 	"/remove-org-member-role": 	RemoveOrgMemberRoleHandler,
 	"/assign-org-role":        	AssignOrgRoleHandler,
+	"/archive-proj": 			ArchiveProjHandler,
 }
