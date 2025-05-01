@@ -18,6 +18,7 @@ var Endpoints = map[string]DBHandlerFunc{
 	"/signup":                  SignupHandler,
 	"/verify":                  VerifyHandler,
 	"/get-user":               	GetUserHandler,
+	"/get-all-users":          	GetAllUsersHandler,
 	"/delete-user":            	DeleteUserHandler,
 	"/update-user":            	UpdateUserHandler,
 	"/create-issue":           	CreateIssueHandler,

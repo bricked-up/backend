@@ -4,6 +4,7 @@ import (
 	"brickedup/backend/users"
 	"brickedup/backend/utils"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -166,6 +167,28 @@ func GetUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(user))
+}
+
+// GetAllUsersHandler handles GET requests to retrieve all verified users. 
+// on /get-all-users.
+func GetAllUsersHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	userids, err := users.GetAllUsers(db)
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("GetAllUsers(): %s\n", err.Error())
+		return
+	}
+
+	json, err := json.Marshal(userids)
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("json.Marshal(): %s\n", err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
 }
 
 // DeleteUserHandler handles DELETE requests to 
