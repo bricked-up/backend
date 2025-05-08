@@ -164,6 +164,11 @@ func GetUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	user, err := users.GetUser(db, userid)
 
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(user))
