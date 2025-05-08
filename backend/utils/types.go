@@ -33,6 +33,19 @@ type Project struct {
 	Roles 	[]int		`json:"roles"`
 }
 
+// ProjectMember contains all information relating to the user in a given 
+// project.
+type ProjectMember struct {
+	ID 			int			`json:"id"`
+	UserID		int 		`json:"userid"`
+	ProjectID 	int			`json:"projectid"`
+	Roles 		[]int		`json:"roles"`
+	CanExec		bool		`json:"can_exec"`
+	CanWrite	bool		`json:"can_write"`
+	CanRead		bool		`json:"can_read"`
+	Issues 		[]int		`json:"issues"`
+}
+
 type Issue struct {
 	ID       		int				`json:"id"`
 	Title    		string			`json:"title"`
