@@ -33,5 +33,6 @@ var Endpoints = map[string]DBHandlerFunc{
 	"/assign-org-role":        		AssignOrgRoleHandler,
 	"/get-proj":					GetProjHandler,
 	"/get-proj-member":				GetProjMemberHandler,
+	"/get-proj-role":				GetProjRoleHandler,
 	"/archive-proj": 				ArchiveProjHandler,
 }

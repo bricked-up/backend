@@ -46,6 +46,16 @@ type ProjectMember struct {
 	Issues 		[]int		`json:"issues"`
 }
 
+// ProjectRole contains all information relating to a role in a project.
+type ProjectRole struct {
+	ID 			int			`json:"id"`
+	ProjectID	int 		`json:"projectid"`
+	Name 		string 		`json:"name"`
+	CanExec		bool		`json:"can_exec"`
+	CanWrite	bool		`json:"can_write"`
+	CanRead		bool		`json:"can_read"`
+}
+
 // Issue contains all information relating to an issue.
 type Issue struct {
 	ID       		int				`json:"id"`
