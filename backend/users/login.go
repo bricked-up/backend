@@ -12,20 +12,17 @@ import (
 // If authentication is successful and the user is verified, it creates a new session or reuses an existing one.
 // It returns the sessionid.
 func Login(db *sql.DB, email, password string) (sessionid int64, err error) {
-	var userID, verifyID int
+	var userID int
 	var storedPassword string
 
     // Query the database to get the user's ID, hashed password, and verification status
     err = db.QueryRow(
-        "SELECT id, password, verifyid FROM USER WHERE email = ?", 
-        email).Scan(&userID, &storedPassword, &verifyID)
+        `SELECT id, password 
+		FROM USER 
+		WHERE email = ? AND verifyid IS NULL `, 
+        email).Scan(&userID, &storedPassword)
 
 	if err != nil {
-        return -1, err
-    }
-
-    // Ensure the user is verified
-    if verifyID == 0 {
         return -1, err
     }
 
