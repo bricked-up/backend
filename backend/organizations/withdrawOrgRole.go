@@ -6,8 +6,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// RemoveOrgMemberRole removes a role from a user within an organization.
-func RemoveOrgMemberRole(db *sql.DB, sessionid int, orgMemberRoleId int) error {
+// WithdrawOrgRole withdraws a role from a user within an organization.
+func WithdrawOrgRole(db *sql.DB, sessionid int, orgMemberRoleId int) error {
 	// Validate user A's session and get their user ID
 	var userAID int
 	err := db.QueryRow("SELECT userid FROM SESSION WHERE id = ?", sessionid).Scan(&userAID)

@@ -74,7 +74,7 @@ func getMemberRoles(db *sql.DB, member *utils.ProjectMember) error {
 }
 
 
-// GetProjMember fetches a project member by its project_memberid from the DB and 
+// GetProjMember fetches a project member by its memberid from the DB and 
 // returns a ProjectMember struct.
 func GetProjMember(db *sql.DB, memberid int) (*utils.ProjectMember, error) {
 	member := &utils.ProjectMember{}

@@ -3,13 +3,14 @@ package endpoints
 import (
 	"brickedup/backend/organizations"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 )
 
-// GetOrg handles GET requests to retrieve all information 
+// GetOrg handles GET requests to retrieve all information
 // about a specific organization on /get-org.
 // It expects an `orgid` URL query parameter, then returns a JSON array.
 func GetOrgHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
@@ -155,10 +156,10 @@ func DeleteOrganizationHandler(db *sql.DB, w http.ResponseWriter, r *http.Reques
     w.WriteHeader(http.StatusOK)
 }
 
-// RemoveOrgMemberRoleHandler handles the removal of a role from a user in an organization
-// on /remove-org-member-role.
+// WithdrawOrgRoleHandler handles the withdrawal of a role from a user in an organization
+// on /withdraw-org-role.
 // It expects a DELETE request with `orgMemberRoleId` in the form and a valid session cookie.
-func RemoveOrgMemberRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func WithdrawOrgRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodDelete {
         http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
         return
@@ -197,18 +198,17 @@ func RemoveOrgMemberRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Reque
     }
 
     // Call the core logic to remove the role
-    err = organizations.RemoveOrgMemberRole(db, sessionID, orgMemberRoleID)
+    err = organizations.WithdrawOrgRole(db, sessionID, orgMemberRoleID)
     if err != nil {
         // You might want more granular error handling here if needed:
         // e.g., 403 Forbidden for permission errors, 404 if role not found, etc.
-        log.Println("removeOrgMemberRole error:", err)
-        http.Error(w, "Failed to remove org member role: "+err.Error(), http.StatusInternalServerError)
+        log.Println("WithdrawOrgRole error:", err)
+        http.Error(w, "Failed to withdraw org role: "+err.Error(), http.StatusInternalServerError)
         return
     }
 
     // Respond with success
     w.WriteHeader(http.StatusOK)
-    fmt.Fprintf(w, "Successfully removed role assignment with ID %d", orgMemberRoleID)
 }
 
 // AssignOrgRoleHandler handles POST requests to assign a new role (newRoleID)
@@ -286,3 +286,44 @@ func AssignOrgRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusOK)
 }
 
+// GetOrgMemberHandler handles GET requests to retrieve information 
+// about a organization member on /get-org-member.
+// It takes `memberid` as a URL parameter.
+func GetOrgMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+
+	memberParam := r.URL.Query().Get("memberid")
+	memberid, err := strconv.Atoi(memberParam)
+
+	if err != nil {
+        http.Error(w, "Invalid parameter for memberid", http.StatusBadRequest)
+        return
+	}
+
+
+	user, err := organizations.GetOrgMember(db, memberid)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		return
+	}
+
+	json, err := json.Marshal(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		log.Println(err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+}

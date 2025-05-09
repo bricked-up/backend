@@ -7,7 +7,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func TestRemoveOrgMemberRole(t *testing.T) {
+func TestWithdrawOrgRole(t *testing.T) {
 	db := utils.SetupTest(t)
 	defer db.Close()
 
@@ -38,7 +38,7 @@ func TestRemoveOrgMemberRole(t *testing.T) {
 	}
 
 	// Try to remove the role
-	err = RemoveOrgMemberRole(db, validSessionID, roleIDToRemove)
+	err = WithdrawOrgRole(db, validSessionID, roleIDToRemove)
 	if err != nil {
 		t.Errorf("Expected role removal to succeed, got error: %v", err)
 	}
@@ -55,7 +55,7 @@ func TestRemoveOrgMemberRole(t *testing.T) {
 
 	// Test with an invalid session ID
 	invalidSessionID := 9999
-	err = RemoveOrgMemberRole(db, invalidSessionID, roleIDToRemove)
+	err = WithdrawOrgRole(db, invalidSessionID, roleIDToRemove)
 	if err == nil {
 		t.Errorf("Expected error for invalid session ID, but got nil")
 	}
