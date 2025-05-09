@@ -43,8 +43,7 @@ func LoginHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	dashboard := fmt.Sprintf("http://%s:3000/dashboard", os.Getenv("HOST"))
-	http.Redirect(w, r, dashboard, http.StatusFound)
+	w.WriteHeader(http.StatusOK)
 }
 
 // SignupHandler handles POST requests for user singups on /signup.
@@ -89,8 +88,11 @@ func VerifyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dashboard := fmt.Sprintf("http://%s:3000/dashboard", os.Getenv("HOST"))
-	http.Redirect(w, r, dashboard, http.StatusFound)
+	origin := r.Header.Get("Origin")
+	if origin != "" {
+		http.Redirect(w, r, origin + "/dashboard", http.StatusFound)
+		return
+	}
 }
 
 // UpdateUserHandler handles PATCH requests to update the 
