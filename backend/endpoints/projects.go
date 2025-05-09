@@ -3,6 +3,7 @@ package endpoints
 import (
 	"brickedup/backend/projects"
 	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -151,3 +152,46 @@ func ArchiveProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	// Return success
 	w.WriteHeader(http.StatusOK)
 }
+
+// GetProjMemberHandler handles GET requests to retrieve information 
+// about a project member on /get-proj-member.
+// It takes `memberid` as a URL parameter.
+func GetProjMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+
+	memberParam := r.URL.Query().Get("memberid")
+	memberid, err := strconv.Atoi(memberParam)
+
+	if err != nil {
+        http.Error(w, "Invalid parameter for userid", http.StatusBadRequest)
+        return
+	}
+
+
+	user, err := projects.GetProjMember(db, memberid)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		return
+	}
+
+	json, err := json.Marshal(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		log.Println(err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+}
+
