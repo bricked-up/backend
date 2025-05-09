@@ -8,6 +8,8 @@ COPY . /backend
 # Setting up environment
 ENV DB "/backend/bricked-up_prod.db"
 ENV LOGS "/backend/backend.log"
+ENV HOST "clabsql.clamv.constructor.university"
+ENV PORT ":3100"
 EXPOSE 3100
 
 # Setting up database

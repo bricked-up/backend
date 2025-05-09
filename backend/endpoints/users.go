@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -92,7 +93,8 @@ func VerifyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	dashboard := fmt.Sprintf("http://%s:3000/dashboard", os.Getenv("HOST"))
+	http.Redirect(w, r, dashboard, http.StatusFound)
 }
 
 // UpdateUserHandler handles PATCH requests to update the 
