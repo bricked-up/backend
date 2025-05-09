@@ -31,6 +31,7 @@ func main() {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
         w.Header().Set("Access-Control-Allow-Headers", "*") 
         w.Header().Set("Access-Control-Allow-Methods", "*")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		db, err := sql.Open("sqlite", os.Getenv("DB"))
 		if err != nil {
