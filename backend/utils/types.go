@@ -89,3 +89,13 @@ type OrgMember struct {
 	CanWrite		bool		`json:"can_write"`
 	CanRead			bool		`json:"can_read"`
 }
+
+// OrgRole contains all information relating to a role in an organization.
+type OrgRole struct {
+	ID 			int			`json:"id"`
+	OrgID		int 		`json:"orgid"`
+	Name 		string 		`json:"name"`
+	CanExec		bool		`json:"can_exec"`
+	CanWrite	bool		`json:"can_write"`
+	CanRead		bool		`json:"can_read"`
+}
