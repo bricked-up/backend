@@ -1,77 +1,21 @@
-package users
+package projects
 
 import (
 	"brickedup/backend/utils"
 	"database/sql"
-	"encoding/json"
-	"errors"
 
 	_ "modernc.org/sqlite"
 )
 
-// Gets all projects that the user is a part of.
-func getUserProjects(db *sql.DB, user *utils.User) error {
-	user.Projects = nil
+// Gets all issues that have been assigned to the member in the project.
+func getMemberIssues(db *sql.DB, member *utils.ProjectMember) error {
+	member.Issues = nil
 
 	rows, err := db.Query(
-		`SELECT projectid 
-		FROM PROJECT_MEMBER
-		WHERE userid = ?`, user.ID)
-
-	if err != nil {
-		return err
-	}
-
-	for rows.Next() {
-		var projectid int
-
-		err := rows.Scan(&projectid)
-		if err != nil {
-			return err
-		}
-
-		user.Projects = append(user.Projects, projectid)
-	}
-
-	return nil
-}
-
-// Gets all organizations that the user is a part of.
-func getUserOrganizations(db *sql.DB, user *utils.User) error {
-	user.Organizations = nil
-
-	rows, err := db.Query(
-		`SELECT orgid 
-		FROM ORG_MEMBER
-		WHERE userid = ?`, user.ID)
-
-	if err != nil {
-		return err
-	}
-
-	for rows.Next() {
-		var orgid int
-
-		err := rows.Scan(&orgid)
-		if err != nil {
-			return err
-		}
-
-		user.Organizations = append(user.Organizations, orgid)
-	}
-
-	return nil
-}
-
-// Gets all issues that have been assigned to the user.
-func getUserIssues(db *sql.DB, user *utils.User) error {
-	user.Issues = nil
-
-	rows, err := db.Query(
-		`SELECT issueid 
-		FROM USER_ISSUES
-		WHERE userid = ?`, user.ID)
-
+		`SELECT DISTINCT ui.issueid
+		FROM USER_ISSUES ui
+		JOIN PROJECT_ISSUES pi ON ui.issueid = pi.issueid
+		WHERE ui.userid = ?`, member.ID)
 	if err != nil {
 		return err
 	}
@@ -84,50 +28,77 @@ func getUserIssues(db *sql.DB, user *utils.User) error {
 			return err
 		}
 
-		user.Issues = append(user.Issues, issueid)
+		member.Issues = append(member.Issues, issueid)
+	}
+
+	return nil
+}
+
+// GetMemberRoles retrieves the roles of the member as well as sets user privileges.
+func getMemberRoles(db *sql.DB, member *utils.ProjectMember) error {
+	rows, err := db.Query(
+		`SELECT roleid
+		FROM PROJECT_MEMBER_ROLE
+		WHERE memberid = ?`, member.ID)
+
+	if err != nil {
+		return err
+	}
+
+	for rows.Next() {
+		var roleid int
+
+		err := rows.Scan(&roleid)
+		if err != nil {
+			return err
+		}
+
+		member.Roles = append(member.Roles, roleid)
+	}
+
+	row := db.QueryRow(`
+		SELECT 
+			MAX(CASE WHEN pr.can_read THEN 1 ELSE 0 END),
+			MAX(CASE WHEN pr.can_write THEN 1 ELSE 0 END),
+			MAX(CASE WHEN pr.can_exec THEN 1 ELSE 0 END)
+		FROM PROJECT_MEMBER_ROLE pmr
+		JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
+		WHERE pmr.memberid = ? `, member.ID)
+
+	err = row.Scan(&member.CanRead, &member.CanWrite, &member.CanExec)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
 
-// GetUser fetches one user by userid from the DB and returns JSON data.
-func GetUser(db *sql.DB, userid int) ([]byte, error) {
-	// Get exactly one row for the given userID.
-	row := db.QueryRow(`SELECT name, email, verified, avatar FROM USER WHERE id = ?`, userid)
+// GetProjMember fetches a project member by its project_memberid from the DB and 
+// returns a ProjectMember struct.
+func GetProjMember(db *sql.DB, memberid int) (*utils.ProjectMember, error) {
+	member := &utils.ProjectMember{}
+	member.ID = memberid
 
-	var user utils.User
-	user.ID = userid
+	row := db.QueryRow(
+		`SELECT userid, projectid 
+		FROM PROJECT_MEMBER
+		WHERE id = ?`, member.ID)
 
-	// Scan fills our user struct with the row's data or returns an error if no row.
-	err := row.Scan(&user.Name, &user.Email, &user.Verified, &user.Avatar)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("UserId not found")
-		}
-		return nil, err
-	}
-
-	err = getUserProjects(db, &user)
+	err := row.Scan(&member.UserID, &member.ProjectID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = getUserOrganizations(db, &user)
+	err = getMemberIssues(db, member)
 	if err != nil {
 		return nil, err
 	}
 
-	err = getUserIssues(db, &user)
+	err = getMemberRoles(db, member)
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert the user struct to JSON.
-	jsonUser, err := json.Marshal(user)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonUser, nil
+	return member, nil
 }
