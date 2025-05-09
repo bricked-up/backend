@@ -37,12 +37,12 @@ func LoginHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		Name: 		LoginCookie,
 		Value:    	session,
 		Expires:  	time.Now().Add(12 * 30 * 24 * time.Hour),
-		Secure:   	false,
+		Secure:   	true,
 		HttpOnly: 	true,
 	}
 
 	http.SetCookie(w, cookie)
-	dashboard := fmt.Sprintf("http://%s:3000/dashboard", os.Getenv("HOST"))
+	dashboard := fmt.Sprintf("https://%s:3000/dashboard", os.Getenv("HOST"))
 	http.Redirect(w, r, dashboard, http.StatusFound)
 }
 
@@ -88,7 +88,7 @@ func VerifyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dashboard := fmt.Sprintf("http://%s:3000/dashboard", os.Getenv("HOST"))
+	dashboard := fmt.Sprintf("https://%s:3000/dashboard", os.Getenv("HOST"))
 	http.Redirect(w, r, dashboard, http.StatusFound)
 }
 
