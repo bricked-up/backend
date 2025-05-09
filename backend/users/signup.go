@@ -30,7 +30,7 @@ func sendVerificationEmail(to string, code string) {
 	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")
 
-	verify_link := fmt.Sprintf("http://%s%s/verify?code=%s", host, port, code)
+	verify_link := fmt.Sprintf("https://%s%s/verify?code=%s", host, port, code)
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", email)
