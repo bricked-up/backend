@@ -46,6 +46,7 @@ type ProjectMember struct {
 	Issues 		[]int		`json:"issues"`
 }
 
+// Issue contains all information relating to an issue.
 type Issue struct {
 	ID       		int				`json:"id"`
 	Title    		string			`json:"title"`
@@ -67,3 +68,14 @@ type Organization struct {
 	Roles 		[]int		`json:"roles"`
 }
 
+// OrgMember contains all information relating to the user in a given 
+// organization.
+type OrgMember struct {
+	ID 				int			`json:"id"`
+	UserID			int 		`json:"userid"`
+	OrganizationID 	int			`json:"projectid"`
+	Roles 			[]int		`json:"roles"`
+	CanExec			bool		`json:"can_exec"`
+	CanWrite		bool		`json:"can_write"`
+	CanRead			bool		`json:"can_read"`
+}
