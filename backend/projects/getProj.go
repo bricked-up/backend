@@ -128,10 +128,10 @@ func getProjRoles(db *sql.DB, proj *utils.Project) error {
 }
 
 // GetProject fetches all the details of a project and returns them as a JSON string
-func GetProject(db *sql.DB, projectID int) (string, error) {
+func GetProject(db *sql.DB, projectID int) ([]byte, error) {
 	// validate projectID is not null or negative value
 	if projectID <= 0 {
-		return "", errors.New("invalid project ID")
+		return nil, errors.New("invalid project ID")
 	}
 
 	// Perform query using the projectID (no need to sanitize for an integer)
@@ -153,31 +153,31 @@ func GetProject(db *sql.DB, projectID int) (string, error) {
 		&project.Archived)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if err := getProjMembers(db, &project); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if err := getProjTags(db, &project); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if err := getProjIssues(db, &project); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if err := getProjRoles(db, &project); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Convert map to JSON
 	jsonData, err := json.Marshal(project)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Return JSON as string
-	return string(jsonData), nil
+	return jsonData, nil
 }
