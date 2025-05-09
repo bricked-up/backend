@@ -27,12 +27,29 @@ func generateVerificationCode() string {
 func sendVerificationEmail(to string, code string) {
 	email := os.Getenv("EMAIL")
 	password := os.Getenv("PASS")
+	host := os.Getenv("HOST")
+	port := os.Getenv("PORT")
+
+	verify_link := fmt.Sprintf("http://%s%s/verify?code=%s", host, port, code)
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", email)
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", "Account Verification")
-	m.SetBody("text/html", fmt.Sprintf("<p>Your verification code is: <strong>%s</strong></p><p><button>Verify</button></p>", code))
+	m.SetBody("text/html", fmt.Sprintf(`
+		<p>
+			Click the link to verify your account!
+		</p>
+		<p>
+			<a href="%s">Verify</a>
+		</p>
+		<p>
+			If you cannot open the link, paste this into a new tab:
+		</p>
+		<p>
+			<quote>%s</quote>
+		</p>
+		`, verify_link, verify_link))
 
 	/* email is sent to user without implementation, but I did not
 	know how to implement sending the email without smtp or server access */
