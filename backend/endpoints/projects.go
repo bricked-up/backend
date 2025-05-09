@@ -229,3 +229,44 @@ func GetProjMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	w.Write(json)
 }
 
+// GetProjRole handles GET requests to retrieve information 
+// about a project role on /get-proj-role.
+// It takes `roleid` as a URL parameter.
+func GetProjRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+
+	roleParam := r.URL.Query().Get("roleid")
+	roleid, err := strconv.Atoi(roleParam)
+
+	if err != nil {
+        http.Error(w, "Invalid parameter for roleid", http.StatusBadRequest)
+        return
+	}
+
+
+	role, err := projects.GetProjRole(db, roleid)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		return
+	}
+
+	json, err := json.Marshal(role)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		log.Println(err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+}
