@@ -11,7 +11,7 @@ import (
 func TestVerifyUser_FromPopulateSQL(t *testing.T) {
 	tests := []struct {
 		name       string
-		code       int
+		code       string
 		expectErr  bool
 		userID     int
 		expectNull bool
@@ -19,7 +19,7 @@ func TestVerifyUser_FromPopulateSQL(t *testing.T) {
 	}{
 		{
 			name:       "Valid code from populate.sql",
-			code:       123456, // this exists and is not expired
+			code:       "123456", // this exists and is not expired
 			expectErr:  false,
 			userID:     1,
 			expectNull: true,
@@ -27,7 +27,7 @@ func TestVerifyUser_FromPopulateSQL(t *testing.T) {
 		},
 		{
 			name:       "Non-existent code",
-			code:       999999,
+			code:       "999999",
 			expectErr:  true,
 			userID:     1,
 			expectNull: false,

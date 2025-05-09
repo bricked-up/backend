@@ -73,20 +73,14 @@ func VerifyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	codeParam := r.URL.Query().Get("code")
+	code := r.URL.Query().Get("code")
 
-	if codeParam == "" {
+	if code == "" {
 		http.Error(w, "Missing id or code", http.StatusBadRequest)
 		return
 	}
 
-	code, err := strconv.Atoi(codeParam)
-	if err != nil {
-		http.Error(w, "Invalid verification ID", http.StatusBadRequest)
-		return
-	}
-
-	err = users.VerifyUser(code, db)
+	err := users.VerifyUser(code, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Println(err.Error())

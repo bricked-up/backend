@@ -9,7 +9,7 @@ import (
 
 // VerifyUser verifies the user's email using the provided verification code.
 // It removes expired codes and sets the user's `verified` field to true.
-func VerifyUser(verificationCode int, db *sql.DB) error {
+func VerifyUser(verificationCode string, db *sql.DB) error {
 	// Remove expired verification codes
 	_, err := db.Exec(
 		`DELETE FROM VERIFY_USER 
