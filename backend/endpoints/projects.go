@@ -9,6 +9,40 @@ import (
 	"strconv"
 )
 
+// GetProjHandler handles GET requests to retrieve data about a project
+// on /get-proj.
+// It takes `projecid` as a URL parameter.
+func GetProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+
+	projParam := r.URL.Query().Get("projectid")
+	projectid, err := strconv.Atoi(projParam)
+
+	if err != nil {
+        http.Error(w, "Invalid parameter for projectid", http.StatusBadRequest)
+        return
+	}
+
+
+	project, err := projects.GetProject(db, projectid)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(project)
+}
 // CreateTagHandler handles POST requests to create a new tag associated with a
 // project on /create-tag.
 // It validates the session, form inputs, and calls the CreateTag logic function.
@@ -171,7 +205,7 @@ func GetProjMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	memberid, err := strconv.Atoi(memberParam)
 
 	if err != nil {
-        http.Error(w, "Invalid parameter for userid", http.StatusBadRequest)
+        http.Error(w, "Invalid parameter for projectid", http.StatusBadRequest)
         return
 	}
 
