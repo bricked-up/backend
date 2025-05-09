@@ -327,3 +327,45 @@ func GetOrgMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(json)
 }
+
+// GetOrgRole handles GET requests to retrieve information 
+// about an organization role on /get-org-role.
+// It takes `roleid` as a URL parameter.
+func GetOrgRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+
+	roleParam := r.URL.Query().Get("roleid")
+	roleid, err := strconv.Atoi(roleParam)
+
+	if err != nil {
+        http.Error(w, "Invalid parameter for roleid", http.StatusBadRequest)
+        return
+	}
+
+
+	role, err := organizations.GetOrgRole(db, roleid)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		return
+	}
+
+	json, err := json.Marshal(role)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		log.Println(err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+}
