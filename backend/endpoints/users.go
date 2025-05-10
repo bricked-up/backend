@@ -97,19 +97,13 @@ func UpdateUserHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := r.ParseForm()
-
 	if err != nil {
 		http.Error(w, "Invalid form", http.StatusBadRequest)
 		return
 	}
 
-	cookie, err := r.Cookie(LoginCookie)
-	if err != nil {
-		http.Error(w, "Invalid cookie session", http.StatusUnauthorized)
-		return
-	}
-
-	sessionID, err := strconv.Atoi(cookie.Value)
+	session := r.FormValue("sessionid")
+	sessionID, err := strconv.Atoi(session)
 	if err != nil {
 		http.Error(w,"Invalid session ID", http.StatusBadRequest)
 		return
@@ -203,31 +197,20 @@ func DeleteUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
         return
     }
 
-	// Get session cookie
-	cookie, err := r.Cookie(LoginCookie)
+	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Missing session cookie", http.StatusUnauthorized)
+		http.Error(w, "Invalid form", http.StatusBadRequest)
 		return
 	}
 
-	sessionID := cookie.Value
+	session := r.FormValue("sessionid")
 
 	// Call backend logic to delete the user
-	if err := users.DeleteUser(db, sessionID); err != nil {
+	if err := users.DeleteUser(db, session); err != nil {
 		http.Error(w, "Failed to delete user: "+err.Error(), http.StatusInternalServerError)
 		log.Println("deleteUser error:", err)
 		return
 	}
-
-	// Invalidate the cookie
-	cleared := &http.Cookie{
-		Name:     LoginCookie,
-		Value:    "",
-		Path:     "/",
-		MaxAge:   -1, // deletes the cookie
-		HttpOnly: true,
-	}
-	http.SetCookie(w, cleared)
 
 	// Respond with success
 	w.WriteHeader(http.StatusOK)

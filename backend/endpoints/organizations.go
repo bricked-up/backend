@@ -67,18 +67,18 @@ func CreateOrganizationHandler(db *sql.DB, w http.ResponseWriter, r *http.Reques
         return
     }
 
-    // Retrieve session ID from cookie
-    cookie, err := r.Cookie(LoginCookie)
-    if err != nil {
-        http.Error(w, "Missing session cookie", http.StatusUnauthorized)
-        return
-    }
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Invalid form", http.StatusBadRequest)
+		return
+	}
 
-    sessionID, err := strconv.Atoi(cookie.Value)
-    if err != nil {
-        http.Error(w, "Invalid session ID", http.StatusBadRequest)
-        return
-    }
+	session := r.FormValue("sessionid")
+	sessionID, err := strconv.Atoi(session)
+	if err != nil {
+		http.Error(w,"Invalid session ID", http.StatusBadRequest)
+		return
+	}
 
     // Get orgName from form
     orgName := r.FormValue("orgName")
@@ -114,18 +114,18 @@ func DeleteOrganizationHandler(db *sql.DB, w http.ResponseWriter, r *http.Reques
         return
     }
 
-    // Retrieve session ID from cookie
-    cookie, err := r.Cookie(LoginCookie)
-    if err != nil {
-        http.Error(w, "Missing session cookie", http.StatusUnauthorized)
-        return
-    }
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Invalid form", http.StatusBadRequest)
+		return
+	}
 
-    sessionID, err := strconv.Atoi(cookie.Value)
-    if err != nil {
-        http.Error(w, "Invalid session ID", http.StatusBadRequest)
-        return
-    }
+	session := r.FormValue("sessionid")
+	sessionID, err := strconv.Atoi(session)
+	if err != nil {
+		http.Error(w,"Invalid session ID", http.StatusBadRequest)
+		return
+	}
 
     // Parse organization ID
     orgIDStr := r.FormValue("orgid")
@@ -179,18 +179,18 @@ func WithdrawOrgRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) 
         return
     }
 
-    // Retrieve session ID from cookie
-    cookie, err := r.Cookie(LoginCookie)
-    if err != nil {
-        http.Error(w, "Missing session cookie", http.StatusUnauthorized)
-        return
-    }
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Invalid form", http.StatusBadRequest)
+		return
+	}
 
-    sessionID, err := strconv.Atoi(cookie.Value)
-    if err != nil {
-        http.Error(w, "Invalid session ID", http.StatusBadRequest)
-        return
-    }
+	session := r.FormValue("sessionid")
+	sessionID, err := strconv.Atoi(session)
+	if err != nil {
+		http.Error(w,"Invalid session ID", http.StatusBadRequest)
+		return
+	}
 
     // Parse orgMemberRoleId from the form
     roleIDStr := r.FormValue("orgMemberRoleId")
@@ -234,17 +234,18 @@ func AssignOrgRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Retrieve session ID from cookie (User A)
-    cookie, err := r.Cookie(LoginCookie)
-    if err != nil {
-        http.Error(w, "Missing session cookie", http.StatusUnauthorized)
-        return
-    }
-    sessionID, err := strconv.Atoi(cookie.Value)
-    if err != nil {
-        http.Error(w, "Invalid session ID", http.StatusBadRequest)
-        return
-    }
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Invalid form", http.StatusBadRequest)
+		return
+	}
+
+	session := r.FormValue("sessionid")
+	sessionID, err := strconv.Atoi(session)
+	if err != nil {
+		http.Error(w,"Invalid session ID", http.StatusBadRequest)
+		return
+	}
 
     // Parse form fields for userID, orgID, and newRoleID (User B, organization, role)
     userIDStr := r.FormValue("userID")

@@ -8,10 +8,6 @@ import (
 // DBHandlerFunc is the function prototype for endpoint handlers.
 type DBHandlerFunc func(*sql.DB, http.ResponseWriter, *http.Request)
 
-// LoginCookie specifies the name of the cookie that holds the user's session
-// token.
-const LoginCookie = "bricked-up_login"
-
 // Endpoints maps URL paths to their corresponding handler functions.
 var Endpoints = map[string]DBHandlerFunc{
 	"/login":                   	LoginHandler,

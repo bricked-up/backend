@@ -57,17 +57,19 @@ func CreateTagHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Read session ID from cookie
-	cookie, err := r.Cookie(LoginCookie)
+	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Missing session cookie", http.StatusUnauthorized)
+		http.Error(w, "Invalid form", http.StatusBadRequest)
 		return
 	}
-	sessionID, err := strconv.Atoi(cookie.Value)
+
+	session := r.FormValue("sessionid")
+	sessionID, err := strconv.Atoi(session)
 	if err != nil {
-		http.Error(w, "Invalid session ID", http.StatusBadRequest)
+		http.Error(w,"Invalid session ID", http.StatusBadRequest)
 		return
 	}
+
 
 	// Parse form values
 	projectID, err := strconv.Atoi(r.FormValue("projectid"))
@@ -105,15 +107,16 @@ func DeleteTagHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Retrieve session ID from cookie
-	cookie, err := r.Cookie(LoginCookie)
+	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Missing session cookie", http.StatusUnauthorized)
+		http.Error(w, "Invalid form", http.StatusBadRequest)
 		return
 	}
-	sessionID, err := strconv.Atoi(cookie.Value)
+
+	session := r.FormValue("sessionid")
+	sessionID, err := strconv.Atoi(session)
 	if err != nil {
-		http.Error(w, "Invalid session ID", http.StatusBadRequest)
+		http.Error(w,"Invalid session ID", http.StatusBadRequest)
 		return
 	}
 
@@ -156,16 +159,16 @@ func ArchiveProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Read session ID from cookie
-	cookie, err := r.Cookie(LoginCookie)
+	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Missing session cookie", http.StatusUnauthorized)
+		http.Error(w, "Invalid form", http.StatusBadRequest)
 		return
 	}
 
-	sessionID, err := strconv.Atoi(cookie.Value)
+	session := r.FormValue("sessionid")
+	sessionID, err := strconv.Atoi(session)
 	if err != nil {
-		http.Error(w, "Invalid session ID", http.StatusBadRequest)
+		http.Error(w,"Invalid session ID", http.StatusBadRequest)
 		return
 	}
 

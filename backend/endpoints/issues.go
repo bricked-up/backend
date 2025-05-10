@@ -21,13 +21,8 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie(LoginCookie)
-	if err != nil {
-		http.Error(w, "Invalid cookie session", http.StatusUnauthorized)
-		return
-	}
-
-	sessionid, err := strconv.Atoi(cookie.Value)
+	session := r.FormValue("sessionid")
+	sessionID, err := strconv.Atoi(session)
 	if err != nil {
 		http.Error(w,"Invalid session ID", http.StatusBadRequest)
 		return
@@ -80,7 +75,7 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	// Call your backend logic
 	_, err = issues.CreateIssue(
-		sessionid, 
+		sessionID, 
 		projectid, 
 		title, 
 		desc, 
