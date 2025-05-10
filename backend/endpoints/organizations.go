@@ -433,3 +433,42 @@ func AddOrgMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+// RemoveOrgMemberHandler handles DELETE requests to remove a member from an organization
+// on /remove-proj-member.
+func RemoveOrgMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+
+	session := r.FormValue("sessionid")
+	sessionid, err := strconv.ParseInt(session, 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	member := r.FormValue("memberid")
+	memberid, err := strconv.Atoi(member)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	err = organizations.RemoveOrgMember(db, sessionid, memberid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

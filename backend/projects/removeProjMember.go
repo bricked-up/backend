@@ -19,9 +19,17 @@ func RemoveProjMember(db *sql.DB, sessionid int64, memberid int) error {
 
 	err = db.QueryRow(`
 		SELECT EXISTS(
-			SELECT 1 FROM PROJECT_MEMBER_ROLE pmr
+			SELECT * FROM PROJECT_MEMBER_ROLE pmr
 			JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
-			WHERE pmr.memberid = ? AND pr.can_exec = 1
+			WHERE pmr.memberid = (
+				SELECT id
+				FROM PROJECT_MEMBER
+				WHERE userid = (
+					SELECT userid
+					FROM SESSION
+					WHERE id = ?
+				)
+			) AND pr.can_exec = 1
 		)`, manager, memberid).Scan(&has_exec)
 
 	if err != nil {

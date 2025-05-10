@@ -25,6 +25,7 @@ var Endpoints = map[string]DBHandlerFunc{
 	"/get-org-member":    			GetOrgMemberHandler,
 	"/get-org-role":				GetOrgRoleHandler,
 	"/add-org-member":				AddOrgMemberHandler,
+	"/remove-org-member":			RemoveOrgMemberHandler,
 	"/create-org":             		CreateOrganizationHandler,
 	"/delete-org":             		DeleteOrganizationHandler,
 	"/withdraw-org-role":		 	WithdrawOrgRoleHandler,

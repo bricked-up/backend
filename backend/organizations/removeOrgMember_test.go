@@ -1,13 +1,13 @@
-package projects_test
+package organizations_test
 
 import (
-	"brickedup/backend/projects"
+	"brickedup/backend/organizations"
 	"brickedup/backend/utils"
 	"testing"
 	"time"
 )
 
-func TestRemoveProjMember(t *testing.T) {
+func TestRemoveOrgMember(t *testing.T) {
 	db := utils.SetupTest(t)
 	defer db.Close()
 
@@ -35,27 +35,27 @@ func TestRemoveProjMember(t *testing.T) {
 		{
 			name: "Successful",
 			sessionid: session,
-			memberid: 1,
+			memberid: 2,
 			wantErr: false,
 		},
 		{
 			name: "Invalid Session",
-			sessionid: 0,
-			memberid: 99,
+			sessionid: 999,
+			memberid: 2,
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotErr := projects.RemoveProjMember(db, tt.sessionid, tt.memberid)
+			gotErr := organizations.RemoveOrgMember(db, tt.sessionid, tt.memberid)
 			if gotErr != nil {
 				if !tt.wantErr {
-					t.Errorf("RemoveProjMember() failed: %v", gotErr)
+					t.Errorf("RemoveOrgMember() failed: %v", gotErr)
 				}
 				return
 			}
 			if tt.wantErr {
-				t.Fatal("RemoveProjMember() succeeded unexpectedly")
+				t.Fatal("RemoveOrgMember() succeeded unexpectedly")
 			}
 		})
 	}
