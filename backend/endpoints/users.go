@@ -32,15 +32,22 @@ func LoginHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	session := fmt.Sprint(sessionid)
 
-	cookie := &http.Cookie{
+	sessionData := utils.SessionData {
 		Name: 		LoginCookie,
-		Value:    	session,
+		ID:      	session,
 		Expires:  	time.Now().Add(12 * 30 * 24 * time.Hour),
-		Partitioned: false,
 	}
 
-	http.SetCookie(w, cookie)
+
+	json, err := json.Marshal(sessionData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
+	w.Write(json)
 }
 
 // SignupHandler handles POST requests for user singups on /signup.
