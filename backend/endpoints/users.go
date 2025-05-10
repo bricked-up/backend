@@ -39,6 +39,7 @@ func LoginHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		Secure:   	true,
 		HttpOnly: 	true,
 		SameSite:   http.SameSiteNoneMode,
+		Partitioned: true,
 	}
 
 	origin := r.Header.Get("Origin")
