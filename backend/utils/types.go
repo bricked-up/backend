@@ -75,6 +75,15 @@ type Issue struct {
 	Dependencies	[]int			`json:"dependencies"`
 }
 
+// Tag holds the details for a tag.
+type Tag struct {
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	Color     string `json:"color"`
+	ProjectID int    `json:"projectid"`
+}
+
+
 // Organization contains the details of an organization.
 type Organization struct {
 	ID    		int 		`json:"id"`

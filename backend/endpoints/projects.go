@@ -229,7 +229,47 @@ func GetProjMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	w.Write(json)
 }
 
-// GetProjRole handles GET requests to retrieve information 
+// GetTagHandler handles GET requests to retrieve information about
+// a tag on /get-tag.
+// It takes `tagid` as a URL parameter.
+func GetTagHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+
+	tagParam := r.URL.Query().Get("tagid")
+	tagid, err := strconv.Atoi(tagParam)
+
+	if err != nil {
+        http.Error(w, "Invalid parameter for tagid", http.StatusBadRequest)
+        return
+	}
+
+	tag, err := projects.GetTag(db, tagid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		log.Println(err.Error())
+		return
+	}
+
+	json, err := json.Marshal(tag)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+}
+
+// GetProjRoleHandler handles GET requests to retrieve information 
 // about a project role on /get-proj-role.
 // It takes `roleid` as a URL parameter.
 func GetProjRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
