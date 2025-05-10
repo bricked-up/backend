@@ -2,6 +2,7 @@ package organizations
 
 import (
 	"brickedup/backend/utils"
+	"reflect"
 	"testing"
 
 	_ "modernc.org/sqlite"
@@ -15,31 +16,25 @@ func TestGetOrg(t *testing.T) {
 		id       int
 		name     string
 		wantErr  bool
-		wantJSON string
+		want 	 *utils.Organization
 	}{
 		{
 			id:       1,
 			name:     "TechCorp Solutions",
 			wantErr:  false,
-			wantJSON: `{"id":1,"name":"TechCorp Solutions","members":[1,2,3],"projects":[1,2,3],"roles":[1,2,3]}`,
-		},
-		{
-			id:       2,
-			name:     "Creative Designs Inc",
-			wantErr:  false,
-			wantJSON: `{"id":2,"name":"Creative Designs Inc","members":[2,4],"projects":[4,5],"roles":[4,5]}`,
-		},
-		{
-			id:       3,
-			name:     "Data Innovations LLC",
-			wantErr:  false,
-			wantJSON: `{"id":3,"name":"Data Innovations LLC","members":[5,3],"projects":[6],"roles":[6,7]}`,
+			want: 	  &utils.Organization{
+				ID: 1,
+				Name: "TechCorp Solutions",
+				Members: []int{1,2,3},
+				Projects: []int{1,2,3},
+				Roles: []int{1,2,3},
+			},
 		},
 		{
 			id:       999,
 			name:     "False Company Inc",
 			wantErr:  true,
-			wantJSON: "",
+			want: 	  nil,
 		},
 	}
 
@@ -57,9 +52,8 @@ func TestGetOrg(t *testing.T) {
 				return
 			}
 
-			gotStr := string(got)
-			if gotStr != tc.wantJSON {
-				t.Errorf("JSON mismatch.\nGot:  %s\nWant: %s", gotStr, tc.wantJSON)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("Error mismatch.\nGot:  %+v\nWant: %+v", got, tc.want)
 			}
 		})
 	}

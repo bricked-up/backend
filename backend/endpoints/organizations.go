@@ -4,7 +4,6 @@ import (
 	"brickedup/backend/organizations"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -29,20 +28,29 @@ func GetOrgHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	orgID, err := strconv.Atoi(orgIDStr)
 	if err != nil {
 		http.Error(w, "Invalid orgid", http.StatusBadRequest)
+		log.Println(err.Error())
 		return
 	}
 
 	// Call the core logic function
-	jsonResult, err := organizations.GetOrg(db, orgID)
+	org, err := organizations.GetOrg(db, orgID)
 	if err != nil {
 		http.Error(w, "Failed to get org: "+err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	json, err := json.Marshal(org)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
 	// Return JSON response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, jsonResult)
+	w.Write(json)
 }
 
 // CreateOrganizationHandler handles POST requests to create a new organization
