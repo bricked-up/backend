@@ -36,20 +36,11 @@ func LoginHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		Name: 		LoginCookie,
 		Value:    	session,
 		Expires:  	time.Now().Add(12 * 30 * 24 * time.Hour),
-		Secure:   	true,
+		Secure:   	false,
 		HttpOnly: 	true,
 		SameSite:   http.SameSiteNoneMode,
 		Partitioned: true,
 	}
-
-	origin := r.Header.Get("Origin")
-	if origin != "" {
-		w.Header().Set("Access-Control-Allow-Origin", origin)
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PATCH, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	}
-
 
 	http.SetCookie(w, cookie)
 	w.WriteHeader(http.StatusOK)
