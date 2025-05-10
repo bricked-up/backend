@@ -37,7 +37,7 @@ func LoginHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		Value:    	session,
 		Expires:  	time.Now().Add(12 * 30 * 24 * time.Hour),
 		Secure:   	false,
-		HttpOnly: 	true,
+		HttpOnly: 	false,
 		SameSite:   http.SameSiteDefaultMode,
 		Partitioned: true,
 	}
