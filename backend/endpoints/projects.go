@@ -35,7 +35,7 @@ func GetProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	project, err := projects.GetProject(db, projectid)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -222,7 +222,7 @@ func GetProjMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	json, err := json.Marshal(user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		log.Println(err.Error())
 		return
 	}
@@ -298,13 +298,13 @@ func GetProjRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	role, err := projects.GetProjRole(db, roleid)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	json, err := json.Marshal(role)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		log.Println(err.Error())
 		return
 	}
