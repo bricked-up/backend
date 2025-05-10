@@ -36,6 +36,7 @@ func LoginHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		Name: 		LoginCookie,
 		Value:    	session,
 		Expires:  	time.Now().Add(12 * 30 * 24 * time.Hour),
+		Partitioned: false,
 	}
 
 	http.SetCookie(w, cookie)
