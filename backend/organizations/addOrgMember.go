@@ -49,7 +49,7 @@ func AddOrgMember(db *sql.DB, sessionid int64, userid int, roleid int, orgid int
 	}
 
 	res, err := db.Exec(`
-		INSERT INTO PROJECT_MEMBER(userid, projectid)
+		INSERT INTO ORG_MEMBER(userid, orgid)
 		VALUES(?, ?)
 	`, userid, orgid)
 
@@ -59,7 +59,7 @@ func AddOrgMember(db *sql.DB, sessionid int64, userid int, roleid int, orgid int
 	}
 
 	res, err = db.Exec(`
-		INSERT INTO PROJECT_MEMBER_ROLE(memberid, roleid)
+		INSERT INTO ORG_MEMBER_ROLE(memberid, roleid)
 		VALUES(?, ?)
 	`, memberid, roleid)
 
