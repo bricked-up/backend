@@ -6,9 +6,9 @@ import (
 )
 
 type SessionData struct {
-	Name 	string 		`json:"name"`
-	ID 		string 		`json:"id"`
-	Expires time.Time	`json:"expires"`
+	SessionID 		int64 		`json:"sessionid"`
+	UserID			int			`json:"userid"`
+	Expires 		time.Time	`json:"expires"`
 }
 
 // User contains the details of a user along with all projects

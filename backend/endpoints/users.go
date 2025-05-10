@@ -5,11 +5,9 @@ import (
 	"brickedup/backend/utils"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 // LoginHandler handles POST requests to the user logins on /login.
@@ -23,23 +21,14 @@ func LoginHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	sessionid, err := users.Login(db, email, password)
+	session, err := users.Login(db, email, password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Println(err.Error())
 		return
 	}
 
-	session := fmt.Sprint(sessionid)
-
-	sessionData := utils.SessionData {
-		Name: 		LoginCookie,
-		ID:      	session,
-		Expires:  	time.Now().Add(12 * 30 * 24 * time.Hour),
-	}
-
-
-	json, err := json.Marshal(sessionData)
+	json, err := json.Marshal(session)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Println(err.Error())
