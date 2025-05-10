@@ -312,13 +312,13 @@ func GetOrgMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	user, err := organizations.GetOrgMember(db, memberid)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	json, err := json.Marshal(user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		log.Println(err.Error())
 		return
 	}
@@ -354,13 +354,13 @@ func GetOrgRoleHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	role, err := organizations.GetOrgRole(db, roleid)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	json, err := json.Marshal(role)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		log.Println(err.Error())
 		return
 	}

@@ -213,7 +213,7 @@ func GetProjMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	user, err := projects.GetProjMember(db, memberid)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
