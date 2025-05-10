@@ -12,12 +12,12 @@ func TestLogin(t *testing.T) {
 	defer db.Close()
 
 	// Test valid login
-	sessionid, err := Login(db, "john.doe@example.com", "hashed_password_1")
+	session, err := Login(db, "john.doe@example.com", "hashed_password_1")
     if err != nil {
         t.Fatal(err)
     }
 
-	if sessionid < 0 {
+	if session.SessionID < 0 {
         t.Fatalf("Valid login failed: invalid sessionid")
     }
 
