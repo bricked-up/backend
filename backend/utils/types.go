@@ -89,7 +89,7 @@ type Organization struct {
 type OrgMember struct {
 	ID 				int			`json:"id"`
 	UserID			int 		`json:"userid"`
-	OrganizationID 	int			`json:"projectid"`
+	OrganizationID 	int			`json:"orgid"`
 	Roles 			[]int		`json:"roles"`
 	CanExec			bool		`json:"can_exec"`
 	CanWrite		bool		`json:"can_write"`
