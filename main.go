@@ -51,15 +51,9 @@ func main() {
 	PORT := os.Getenv("PORT")
 	HOST := os.Getenv("HOST")
 
-	log.Printf("Listening on http://%s%s", HOST, PORT)
-	err := http.ListenAndServe(PORT, nil)
+	log.Printf("Listening on https://%s%s", HOST, PORT)
+	err := http.ListenAndServeTLS(PORT, "/cert/brickedup.crt", "/cert/priv.key", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// log.Printf("Listening on https://%s%s", HOST, PORT)
-	// err := http.ListenAndServeTLS(PORT, "/cert/brickedup.crt", "/cert/priv.key", nil)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 }
