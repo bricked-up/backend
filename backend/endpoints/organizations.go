@@ -521,3 +521,29 @@ func UpdateOrgHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+// GetAllOrgHandler handles GET requests and returns all organization IDs as JSON
+// on /get-all-orgs.
+func GetAllOrgHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	orgids, err := organizations.GetAllOrg(db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	json, err := json.Marshal(orgids)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+}
