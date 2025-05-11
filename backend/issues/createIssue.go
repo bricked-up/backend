@@ -18,7 +18,8 @@ func CreateIssue(
 	priority int, 
 	completed time.Time, 
 	cost int, 
-	date time.Time, 
+	date time.Time,
+	assignee int, 
 	db *sql.DB) (int64, error) {
 
 	var userID int
@@ -66,10 +67,33 @@ func CreateIssue(
 		return -1, err
 	}
 
-	_, err = db.Exec(`
-	INSERT INTO PROJECT_ISSUES (projectid, issueid)
+	if projectid >= 0  {
+		_, err = db.Exec(`
+		INSERT INTO PROJECT_ISSUES (projectid, issueid)
+		VALUES (?, ?)
+		`, projectid, id)
+
+		if err != nil {
+			return -1, err
+		}
+	}
+
+	if assignee >= 0 {
+		var exists bool
+	 err = db.QueryRow(`
+	 SELECT EXISTS (
+		SELECT * FROM project_member WHERE userid = ?
+	 )
+	 `, assignee).Scan(&exists)
+	 if err != nil {
+		return -1, err
+	 }
+	}
+		
+	_, err  = db.Exec(`
+	INSERT INTO USER_ISSUES (userid, issueid)
 	VALUES (?, ?)
-	`, projectid, id)
+	`, userID, id)
 
 	if err != nil {
 		return -1, err

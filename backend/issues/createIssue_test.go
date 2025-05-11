@@ -57,7 +57,8 @@ func TestCreateNewIssue(t *testing.T) {
 		priority, 
 		completed, 
 		cost, 
-		createdDate, 
+		createdDate,
+		userID, 
 		db)
 
 	if err != nil {
@@ -75,7 +76,8 @@ func TestCreateNewIssue(t *testing.T) {
 		priority, 
 		completed, 
 		cost, 
-		createdDate, 
+		createdDate,
+		userID, 
 		db)
 
 	if err == nil {
@@ -93,7 +95,8 @@ func TestCreateNewIssue(t *testing.T) {
 		priority, 
 		completed, 
 		cost, 
-		createdDate, 
+		createdDate,
+		userID, 
 		db)
 
 	if err == nil {
@@ -127,7 +130,8 @@ func TestCreateNewIssue(t *testing.T) {
 		priority, 
 		completed, 
 		cost, 
-		createdDate, 
+		createdDate,
+		userID, 
 		db)
 
 	if err == nil {

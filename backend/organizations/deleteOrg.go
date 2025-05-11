@@ -64,23 +64,23 @@ func DeleteOrganization(db *sql.DB, sessionID int, orgID int) error {
 		return err
 	}
 
-	// Check if the user has admin privileges
-	var isAdmin bool
-	err = db.QueryRow(`
-		SELECT EXISTS(
-			SELECT 1 FROM ORG_MEMBER_ROLE mr
-			JOIN ORG_ROLE r ON mr.roleid = r.id
-			WHERE mr.memberid = ? AND r.orgid = ? AND r.can_exec = 1
-		)
-	`, memberID, orgID).Scan(&isAdmin)
+	// // Check if the user has admin privileges
+	// var isAdmin bool
+	// err = db.QueryRow(`
+	// 	SELECT EXISTS(
+	// 		SELECT 1 FROM ORG_MEMBER_ROLE mr
+	// 		JOIN ORG_ROLE r ON mr.roleid = r.id
+	// 		WHERE mr.memberid = ? AND r.orgid = ? AND r.can_exec = 1
+	// 	)
+	// `, memberID, orgID).Scan(&isAdmin)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	if !isAdmin {
-		return errors.New("user does not have permission to delete the organization")
-	}
+	// if !isAdmin {
+	// 	return errors.New("user does not have permission to delete the organization")
+	// }
 
 	// Delete the organization (cascade will handle related records)
 	result, err := db.Exec("DELETE FROM ORGANIZATION WHERE id = ?", orgID)

@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"brickedup/backend/issues"
+	"brickedup/backend/utils"
 	"database/sql"
 	"log"
 	"net/http"
@@ -59,6 +60,12 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	dateStr := r.FormValue("date")
 	completedStr := r.FormValue("completed")
 
+	assignee, err := strconv.Atoi(r.FormValue("assignee"))
+	if err != nil {
+		http.Error(w, "Invalid assignee", http.StatusBadRequest)
+		return
+	}
+
 	const layout = "2006-01-02 15:04:05"
 
 	date, err := time.Parse(layout, dateStr)
@@ -83,7 +90,8 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		priority, 
 		completed, 
 		cost, 
-		date, 
+		date,
+		assignee, 
 		db)
 
 	if err != nil {
@@ -134,3 +142,80 @@ func GetIssueHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(jsonStr))
 }
 
+// UpdateIssueHandler handles PATCH requests to update an existing issue on /update-issue.
+func UpdateIssueHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPatch {
+        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form", http.StatusBadRequest)
+        return
+    }
+
+    // Parse and validate issue ID
+    issueIDStr := r.FormValue("issueid")
+    issueID, err := strconv.Atoi(issueIDStr)
+    if err != nil {
+        http.Error(w, "Invalid issue ID", http.StatusBadRequest)
+        return
+    }
+
+    // Build the payload
+    var issue utils.Issue
+    issue.Title = r.FormValue("title")
+    issue.Desc  = r.FormValue("desc")
+
+    if costStr := r.FormValue("cost"); costStr != "" {
+        cost, err := strconv.Atoi(costStr)
+        if err != nil {
+            http.Error(w, "Invalid cost", http.StatusBadRequest)
+            return
+        }
+        issue.Cost = cost
+    }
+
+    if tagStr := r.FormValue("tagid"); tagStr != "" {
+        tagID, err := strconv.Atoi(tagStr)
+        if err != nil {
+            http.Error(w, "Invalid tag ID", http.StatusBadRequest)
+            return
+        }
+        issue.TagID = tagID
+    }
+
+    if prioStr := r.FormValue("priority"); prioStr != "" {
+        priority, err := strconv.Atoi(prioStr)
+        if err != nil {
+            http.Error(w, "Invalid priority", http.StatusBadRequest)
+            return
+        }
+        issue.Priority = priority
+    }
+
+    // Parse optional completed timestamp
+    completedStr := r.FormValue("completed")
+    if completedStr != "" {
+        const layout = "2006-01-02 15:04:05"
+        t, err := time.Parse(layout, completedStr)
+        if err != nil {
+            http.Error(w, "Invalid completed date format (use YYYY-MM-DD HH:MM:SS)", http.StatusBadRequest)
+            return
+        }
+        issue.Completed = sql.NullTime{Time: t, Valid: true}
+    }
+
+    // Call core business logic
+    if err := issues.UpdateIssue(db, issueID, &issue); err != nil {
+        if err.Error() == "no issue found for issue ID "+issueIDStr {
+            http.Error(w, "Issue not found", http.StatusNotFound)
+        } else {
+            log.Println("UpdateIssue error:", err)
+            http.Error(w, "Failed to update issue: "+err.Error(), http.StatusInternalServerError)
+        }
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+}
