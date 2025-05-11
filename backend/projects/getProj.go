@@ -14,7 +14,7 @@ func getProjMembers(db *sql.DB, proj *utils.Project) error {
 	proj.Members = nil
 
 	query := `
-		SELECT userid 
+		SELECT id 
 		FROM PROJECT_MEMBER 
 		WHERE projectid = ?
 	`
