@@ -14,7 +14,7 @@ func getOrgMembers(db *sql.DB, org *utils.Organization) error {
 
 	// Prepare query to get all members of the organization
 	query := `
-		SELECT userid 
+		SELECT id 
 		FROM ORG_MEMBER 
 		WHERE orgid = ?
 	`

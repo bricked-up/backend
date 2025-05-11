@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"brickedup/backend/organizations"
+	"brickedup/backend/utils"
 	"database/sql"
 	"encoding/json"
 	"log"
@@ -466,6 +467,54 @@ func RemoveOrgMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) 
 	err = organizations.RemoveOrgMember(db, sessionid, memberid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// UpdateOrgHandler handles PATCH requests to update an organization on
+// /update-org.
+func UpdateOrgHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPatch {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	session := r.FormValue("sessionid")
+	sessionid, err := strconv.Atoi(session)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	org := r.FormValue("orgid")
+	orgid, err := strconv.Atoi(org)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	name := r.FormValue("nameid")
+
+	updated_org := utils.Organization {
+		ID: orgid,
+		Name: name,
+	}
+
+	err = organizations.UpdateOrg(db, sessionid, orgid, updated_org)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Println(err.Error())
 		return
 	}
