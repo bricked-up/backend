@@ -407,3 +407,29 @@ func RemoveProjMemberHandler(db *sql.DB, w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusOK)
 }
+
+// GetAllProjHandler handles GET requests and returns all projectIDs as JSON
+// on /get-all-project.
+func GetAllProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	projids, err := projects.GetAllProj(db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	json, err := json.Marshal(projids)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+}
