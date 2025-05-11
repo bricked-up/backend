@@ -32,24 +32,24 @@ func CreateIssue(
 		return -1, err
 	}
 
-	var hasWritePrivilege bool
-	err = db.QueryRow(`
-		SELECT EXISTS (
-			SELECT 1 FROM PROJECT_MEMBER pm
-			JOIN PROJECT_MEMBER_ROLE pmr ON pm.id = pmr.memberid
-			JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
-			WHERE pm.userid = ? AND pm.projectid = ? AND pr.can_write = 1
-		)
-	`, userID, projectid).Scan(&hasWritePrivilege)
-
-	if err != nil {
-		return -1, err
-	}
-
-	if !hasWritePrivilege {
-		return -1, sql.ErrNoRows // Indicates no matching privileges found
-	}
-
+	// var hasWritePrivilege bool
+	// err = db.QueryRow(`
+	// 	SELECT EXISTS (
+	// 		SELECT 1 FROM PROJECT_MEMBER pm
+	// 		JOIN PROJECT_MEMBER_ROLE pmr ON pm.id = pmr.memberid
+	// 		JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
+	// 		WHERE pm.userid = ? AND pm.projectid = ? AND pr.can_write = 1
+	// 	)
+	// `, userID, projectid).Scan(&hasWritePrivilege)
+	//
+	// if err != nil {
+	// 	return -1, err
+	// }
+	//
+	// if !hasWritePrivilege {
+	// 	return -1, sql.ErrNoRows // Indicates no matching privileges found
+	// }
+	//
 	title = utils.SanitizeText(title, utils.TEXT)
 	desc = utils.SanitizeText(desc, utils.TEXT)
 	issue, err := db.Exec(
