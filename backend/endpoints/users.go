@@ -81,11 +81,7 @@ func VerifyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	origin := r.Header.Get("Origin")
-	if origin != "" {
-		http.Redirect(w, r, origin + "/dashboard", http.StatusFound)
-		return
-	}
+	w.WriteHeader(http.StatusOK)
 }
 
 // UpdateUserHandler handles PATCH requests to update the 
