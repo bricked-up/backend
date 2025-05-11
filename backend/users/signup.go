@@ -71,8 +71,8 @@ func Signup(db *sql.DB, email, password string) error {
 
 	// Insert user into database
 	res, err := db.Exec(
-		`INSERT INTO USER (email, password, name) 
-		VALUES (?, ?, 'New User')`, 
+		`INSERT INTO USER (email, password, name, avatar) 
+		VALUES (?, ?, 'New User', 'default.png')`, 
 		sanitizedEmail, passwordHash)
 
 	if err != nil {
