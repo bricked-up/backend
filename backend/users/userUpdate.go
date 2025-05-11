@@ -32,7 +32,7 @@ func UpdateUser(db *sql.DB, sessionID int, user *utils.User) error {
 	// Update the user’s display name in the USER table.
 	query := `
 	UPDATE USER 
-	SET name = ?, avatar = ?, email = ?, password = ?
+	SET name = ?, avatar = ?, email = ?
 	WHERE id = ?
 	`
 	_, err = db.Exec(
@@ -40,11 +40,22 @@ func UpdateUser(db *sql.DB, sessionID int, user *utils.User) error {
 		user.Name,
 		user.Avatar,
 		user.Email,
-		user.Password,
 		userID)
 
 	if err != nil {
 		return err
+	}
+
+	if user.Password != "" {
+		_, err := db.Exec(`
+			UPDATE USER
+			SET password = ?
+			WHERE id = ?
+		`, user.Password, user.ID)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
