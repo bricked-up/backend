@@ -77,7 +77,7 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Failed to create issue: "+err.Error(), http.StatusInternalServerError)
-		log.Println(err)
+		log.Println(err.Error())
 		return
 	}
 

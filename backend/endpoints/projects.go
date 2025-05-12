@@ -521,7 +521,9 @@ func UpdateProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	budget, err := strconv.Atoi(budgetstr)
 	if err != nil {
-
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
 	}
 
 	updated_org := utils.Project {
