@@ -88,21 +88,16 @@ func CreateIssue(
 				return -1, err
 			}
 		} else {
-			err = db.QueryRow(`
-			SELECT EXISTS (
-				SELECT * FROM project_member WHERE userid = ?
-			)
-			`, assignee).Scan(&userID)
+			_, err  = db.Exec(`
+			INSERT INTO USER_ISSUES (userid, issueid)
+			VALUES (?, ?)
+			`, userID, id)
+
+			if err != nil {
+				return -1, err
+			}
 		}
 
-		_, err  = db.Exec(`
-		INSERT INTO USER_ISSUES (userid, issueid)
-		VALUES (?, ?)
-		`, userID, id)
-
-		if err != nil {
-			return -1, err
-		}
 
 		return id, nil
 	}
