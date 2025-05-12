@@ -50,6 +50,8 @@ func main() {
 			log.Panic(err)
 		}
 
+		db.SetMaxOpenConns(1)
+
 		defer db.Close()
 		backend.MainHandler(db, w, r)
 	})
