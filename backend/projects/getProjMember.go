@@ -56,16 +56,38 @@ func getMemberRoles(db *sql.DB, member *utils.ProjectMember) error {
 		member.Roles = append(member.Roles, roleid)
 	}
 
-	row := db.QueryRow(`
-		SELECT 
-			MAX(CASE WHEN pr.can_read THEN 1 ELSE 0 END),
-			MAX(CASE WHEN pr.can_write THEN 1 ELSE 0 END),
-			MAX(CASE WHEN pr.can_exec THEN 1 ELSE 0 END)
-		FROM PROJECT_MEMBER_ROLE pmr
-		JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
-		WHERE pmr.memberid = ? `, member.ID)
+	err = db.QueryRow(`
+		SELECT EXISTS (
+			SELECT *
+			FROM PROJECT_MEMBER_ROLE pmr
+			JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
+			WHERE pmr.memberid = ? AND pr.can_exec = 1 
+		)`, member.ID).Scan(&member.CanExec)
 
-	err = row.Scan(&member.CanRead, &member.CanWrite, &member.CanExec)
+	if err != nil {
+		return err
+	}
+
+	err = db.QueryRow(`
+		SELECT EXISTS (
+			SELECT *
+			FROM PROJECT_MEMBER_ROLE pmr
+			JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
+			WHERE pmr.memberid = ? AND pr.can_write = 1 
+		)`, member.ID).Scan(&member.CanWrite)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.QueryRow(`
+		SELECT EXISTS (
+			SELECT *
+			FROM PROJECT_MEMBER_ROLE pmr
+			JOIN PROJECT_ROLE pr ON pmr.roleid = pr.id
+			WHERE pmr.memberid = ? AND pr.can_read = 1 
+		)`, member.ID).Scan(&member.CanRead)
+
 	if err != nil {
 		return err
 	}
