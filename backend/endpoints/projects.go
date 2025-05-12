@@ -433,3 +433,52 @@ func GetAllProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(json)
 }
+
+// CreateProj handles POST requests to create a project on /create-proj.
+func CreateProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+
+	session := r.FormValue("sessionid")
+	sessionid, err := strconv.Atoi(session)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	org := r.FormValue("orgid")
+	orgid, err := strconv.Atoi(org)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	name := r.FormValue("name")
+	charter := r.FormValue("charter")
+
+	budgetstr := r.FormValue("budget")
+	budget, err := strconv.Atoi(budgetstr)
+
+	if err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	err = projects.CreateProj(db, sessionid, orgid, name, budget, charter)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

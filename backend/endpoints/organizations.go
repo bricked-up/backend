@@ -505,7 +505,7 @@ func UpdateOrgHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := r.FormValue("nameid")
+	name := r.FormValue("name")
 
 	updated_org := utils.Organization {
 		ID: orgid,
