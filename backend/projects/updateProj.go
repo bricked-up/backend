@@ -10,7 +10,7 @@ import (
 )
 
 // UpdateProject function updates project.
-func updateProject(db *sql.DB, sessionID, projectID int, project utils.Project) error {
+func UpdateProject(db *sql.DB, sessionID, projectID int, project utils.Project) error {
 	// First, validate the session and check execution privileges
 	var userID int
 	var sessionExpires time.Time

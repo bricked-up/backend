@@ -64,7 +64,7 @@ func TestUpdateProject(t *testing.T) {
 	}
 
 	// Test successful update
-	err = updateProject(db, sessionID, projectID, updatedProject)
+	err = UpdateProject(db, sessionID, projectID, updatedProject)
 	if err != nil {
 		t.Errorf("Expected project update to succeed, got error: %v", err)
 	}
@@ -93,14 +93,14 @@ func TestUpdateProject(t *testing.T) {
 
 	// Test with non-existent project ID
 	nonExistentProjectID := 99999
-	err = updateProject(db, sessionID, nonExistentProjectID, updatedProject)
+	err = UpdateProject(db, sessionID, nonExistentProjectID, updatedProject)
 	if err == nil {
 		t.Errorf("Expected error for non-existent project ID, but got nil")
 	}
 
 	// Test with invalid session ID
 	invalidSessionID := 99999
-	err = updateProject(db, invalidSessionID, projectID, updatedProject)
+	err = UpdateProject(db, invalidSessionID, projectID, updatedProject)
 	if err == nil {
 		t.Errorf("Expected error for invalid session ID, but got nil")
 	}
@@ -118,7 +118,7 @@ func TestUpdateProject(t *testing.T) {
 	}
 	expiredSessionID := int(expiredID)
 
-	err = updateProject(db, expiredSessionID, projectID, updatedProject)
+	err = UpdateProject(db, expiredSessionID, projectID, updatedProject)
 	if err == nil {
 		t.Errorf("Expected error for expired session, but got nil")
 	}
@@ -198,7 +198,7 @@ func TestUpdateProject(t *testing.T) {
 	}
 
 	// Try to update with a user who doesn't have exec privileges
-	err = updateProject(db, int(nonExecSessionID), projectID, updatedProject)
+	err = UpdateProject(db, int(nonExecSessionID), projectID, updatedProject)
 	if err == nil {
 		t.Errorf("Expected error for user without exec privileges, but got nil")
 	}

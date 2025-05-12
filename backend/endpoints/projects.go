@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"brickedup/backend/projects"
+	"brickedup/backend/utils"
 	"database/sql"
 	"encoding/json"
 	"log"
@@ -482,3 +483,61 @@ func CreateProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+// UpdateProjHandler handles PATCH requests to update an project on
+// /update-proj.
+func UpdateProjHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPatch {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	session := r.FormValue("sessionid")
+	sessionid, err := strconv.Atoi(session)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	proj := r.FormValue("projectid")
+	projid, err := strconv.Atoi(proj)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	name := r.FormValue("name")
+	charter := r.FormValue("charter")
+	budgetstr := r.FormValue("budget")
+
+	budget, err := strconv.Atoi(budgetstr)
+	if err != nil {
+
+	}
+
+	updated_org := utils.Project {
+		ID: projid,
+		Name: name,
+		Budget: budget,
+		Charter: charter,
+	}
+
+	err = projects.UpdateProject(db, sessionid, projid, updated_org)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
