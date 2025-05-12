@@ -19,6 +19,7 @@ var Endpoints = map[string]DBHandlerFunc{
 	"/update-user":            		UpdateUserHandler,
 	"/create-issue":           		CreateIssueHandler,
 	"/get-issue":               	GetIssueHandler,
+	"/update-issue":           		UpdateIssueHandler,
 	"/create-tag":             		CreateTagHandler,
 	"/delete-tag":             		DeleteTagHandler,
 	"/get-org":         			GetOrgHandler,
