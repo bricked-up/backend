@@ -16,7 +16,6 @@ func CreateIssue(
 	desc string, 
 	tagid int, 
 	priority int, 
-	completed time.Time, 
 	cost int, 
 	date time.Time,
 	assignee int, 
@@ -54,9 +53,9 @@ func CreateIssue(
 		title = utils.SanitizeText(title, utils.TEXT)
 		desc = utils.SanitizeText(desc, utils.TEXT)
 		issue, err := db.Exec(
-			`INSERT INTO issue (title, "desc", tagid, priority, created, completed, cost) 
-			VALUES (?, ?, ?, ?, ?, ?, ?)`,
-			title, desc, tagid, priority, date, completed, cost,
+			`INSERT INTO issue (title, "desc", tagid, priority, created, cost) 
+			VALUES (?, ?, ?, ?, ?, ?)`,
+			title, desc, tagid, priority, date, cost,
 		)
 		if err != nil {
 			return -1, err

@@ -18,7 +18,6 @@ func TestCreateNewIssue(t *testing.T) {
 	desc := "This is a sample issue"
 	tagid := 1    // Ensure this matches an existing ID in TAG table
 	priority := 1 // Ensure this matches an existing ID in PRIORITY table
-	completed := time.Now().Add(24 * time.Hour)
 	cost := 500
 	createdDate := time.Now()
 
@@ -55,7 +54,6 @@ func TestCreateNewIssue(t *testing.T) {
 		desc, 
 		tagid, 
 		priority, 
-		completed, 
 		cost, 
 		createdDate,
 		userID, 
@@ -74,7 +72,6 @@ func TestCreateNewIssue(t *testing.T) {
 		desc, 
 		tagid, 
 		priority, 
-		completed, 
 		cost, 
 		createdDate,
 		userID, 
@@ -93,7 +90,6 @@ func TestCreateNewIssue(t *testing.T) {
 		desc, 
 		tagid, 
 		priority, 
-		completed, 
 		cost, 
 		createdDate,
 		userID, 
@@ -128,7 +124,6 @@ func TestCreateNewIssue(t *testing.T) {
 		desc, 
 		tagid, 
 		priority, 
-		completed, 
 		cost, 
 		createdDate,
 		userID, 

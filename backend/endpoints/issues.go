@@ -56,27 +56,9 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse date and completed (optional: validate layout)
-	dateStr := r.FormValue("date")
-	completedStr := r.FormValue("completed")
-
 	assignee, err := strconv.Atoi(r.FormValue("assignee"))
 	if err != nil {
 		http.Error(w, "Invalid assignee", http.StatusBadRequest)
-		return
-	}
-
-	const layout = "2006-01-02 15:04:05"
-
-	date, err := time.Parse(layout, dateStr)
-	if err != nil {
-		http.Error(w, "Invalid date format (use YYYY-MM-DD HH:MM:SS)", http.StatusBadRequest)
-		return
-	}
-
-	completed, err := time.Parse(layout, completedStr)
-	if err != nil {
-		http.Error(w, "Invalid completed date format (use YYYY-MM-DD HH:MM:SS)", http.StatusBadRequest)
 		return
 	}
 
@@ -88,9 +70,8 @@ func CreateIssueHandler (db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		desc, 
 		tagID, 
 		priority, 
-		completed, 
 		cost, 
-		date,
+		time.Now(),
 		assignee, 
 		db)
 
